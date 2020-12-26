@@ -1,5 +1,5 @@
 <?php
-namespace App;
+namespace CReP;
 
 /**
  * Frontend Pages Handler
@@ -19,8 +19,8 @@ class Frontend {
      * @return string
      */
     public function render_frontend( $atts, $content = '' ) {
-        wp_enqueue_style( 'baseplugin-frontend' );
-        wp_enqueue_script( 'baseplugin-frontend' );
+        wp_enqueue_style( 'crep-frontend' );
+        wp_enqueue_script( 'crep-frontend' );
 
         $content .= '<div id="vue-frontend-app"></div>';
 

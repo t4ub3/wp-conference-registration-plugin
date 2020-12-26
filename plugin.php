@@ -1,19 +1,19 @@
 <?php
 /*
-Plugin Name: Vue Starter Plugin
-Plugin URI: https://example.com/
-Description: A WordPress Vue.js starter plugin
+Plugin Name: Conference Regstration Plugin
+Plugin URI: https://github.com/t4ub3/wp-conference-registration-plugin
+Description: A Plugin providing simple registration service for conferences, seminars etc.
 Version: 0.1
-Author: Your Name
-Author URI: https://example.com/
+Author: t4ub3
+Author URI: https://github.com/t4ub3
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Text Domain: baseplugin
+Text Domain: crep
 Domain Path: /languages
 */
 
 /**
- * Copyright (c) YEAR Your Name (email: Email). All rights reserved.
+ * Copyright (c) 2020 t4ub3. All rights reserved.
  *
  * Released under the GPL license
  * http://www.opensource.org/licenses/gpl-license.php
@@ -42,11 +42,11 @@ Domain Path: /languages
 if ( !defined( 'ABSPATH' ) ) exit;
 
 /**
- * Base_Plugin class
+ * CReP class
  *
- * @class Base_Plugin The class that holds the entire Base_Plugin plugin
+ * @class CReP The class that holds the entire CReP plugin
  */
-final class Base_Plugin {
+final class CReP {
 
     /**
      * Plugin version
@@ -63,7 +63,7 @@ final class Base_Plugin {
     private $container = array();
 
     /**
-     * Constructor for the Base_Plugin class
+     * Constructor for the CReP class
      *
      * Sets up all the appropriate hooks and actions
      * within our plugin.
@@ -79,16 +79,16 @@ final class Base_Plugin {
     }
 
     /**
-     * Initializes the Base_Plugin() class
+     * Initializes the CReP() class
      *
-     * Checks for an existing Base_Plugin() instance
+     * Checks for an existing CReP() instance
      * and if it doesn't find one, creates it.
      */
     public static function init() {
         static $instance = false;
 
         if ( ! $instance ) {
-            $instance = new Base_Plugin();
+            $instance = new CReP();
         }
 
         return $instance;
@@ -126,12 +126,12 @@ final class Base_Plugin {
      * @return void
      */
     public function define_constants() {
-        define( 'BASEPLUGIN_VERSION', $this->version );
-        define( 'BASEPLUGIN_FILE', __FILE__ );
-        define( 'BASEPLUGIN_PATH', dirname( BASEPLUGIN_FILE ) );
-        define( 'BASEPLUGIN_INCLUDES', BASEPLUGIN_PATH . '/includes' );
-        define( 'BASEPLUGIN_URL', plugins_url( '', BASEPLUGIN_FILE ) );
-        define( 'BASEPLUGIN_ASSETS', BASEPLUGIN_URL . '/assets' );
+        define( 'CREP_VERSION', $this->version );
+        define( 'CREP_FILE', __FILE__ );
+        define( 'CREP_PATH', dirname( CREP_FILE ) );
+        define( 'CREP_INCLUDES', CREP_PATH . '/includes' );
+        define( 'CREP_URL', plugins_url( '', CREP_FILE ) );
+        define( 'CREP_ASSETS', CREP_URL . '/assets' );
     }
 
     /**
@@ -151,13 +151,15 @@ final class Base_Plugin {
      */
     public function activate() {
 
-        $installed = get_option( 'baseplugin_installed' );
+        $installed = get_option( 'crep_installed' );
 
         if ( ! $installed ) {
-            update_option( 'baseplugin_installed', time() );
+            include_once( plugin_dir_path( __FILE__ ) . 'includes/DatabaseSetup.php' );
+            crep_setup_tables();
+            update_option( 'crep_installed', time() );
         }
 
-        update_option( 'baseplugin_version', BASEPLUGIN_VERSION );
+        update_option( 'crep_version', CREP_VERSION );
     }
 
     /**
@@ -176,21 +178,21 @@ final class Base_Plugin {
      */
     public function includes() {
 
-        require_once BASEPLUGIN_INCLUDES . '/Assets.php';
+        require_once CREP_INCLUDES . '/Assets.php';
 
         if ( $this->is_request( 'admin' ) ) {
-            require_once BASEPLUGIN_INCLUDES . '/Admin.php';
+            require_once CREP_INCLUDES . '/Admin.php';
         }
 
         if ( $this->is_request( 'frontend' ) ) {
-            require_once BASEPLUGIN_INCLUDES . '/Frontend.php';
+            require_once CREP_INCLUDES . '/Frontend.php';
         }
 
         if ( $this->is_request( 'ajax' ) ) {
-            // require_once BASEPLUGIN_INCLUDES . '/class-ajax.php';
+            // require_once CREP_INCLUDES . '/class-ajax.php';
         }
 
-        require_once BASEPLUGIN_INCLUDES . '/Api.php';
+        require_once CREP_INCLUDES . '/Api.php';
     }
 
     /**
@@ -214,19 +216,19 @@ final class Base_Plugin {
     public function init_classes() {
 
         if ( $this->is_request( 'admin' ) ) {
-            $this->container['admin'] = new App\Admin();
+            $this->container['admin'] = new CReP\Admin();
         }
 
         if ( $this->is_request( 'frontend' ) ) {
-            $this->container['frontend'] = new App\Frontend();
+            $this->container['frontend'] = new CReP\Frontend();
         }
 
         if ( $this->is_request( 'ajax' ) ) {
-            // $this->container['ajax'] =  new App\Ajax();
+            // $this->container['ajax'] =  new CReP\Ajax();
         }
 
-        $this->container['api'] = new App\Api();
-        $this->container['assets'] = new App\Assets();
+        $this->container['api'] = new CReP\Api();
+        $this->container['assets'] = new CReP\Assets();
     }
 
     /**
@@ -235,7 +237,7 @@ final class Base_Plugin {
      * @uses load_plugin_textdomain()
      */
     public function localization_setup() {
-        load_plugin_textdomain( 'baseplugin', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+        load_plugin_textdomain( 'crep', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
     }
 
     /**
@@ -264,6 +266,6 @@ final class Base_Plugin {
         }
     }
 
-} // Base_Plugin
+} // CReP
 
-$baseplugin = Base_Plugin::init();
+$crep = CReP::init();

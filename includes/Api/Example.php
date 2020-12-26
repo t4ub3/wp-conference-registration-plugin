@@ -1,5 +1,5 @@
 <?php
-namespace App\Api;
+namespace CReP\Api;
 
 use WP_REST_Controller;
 
@@ -12,7 +12,7 @@ class Example extends WP_REST_Controller {
      * [__construct description]
      */
     public function __construct() {
-        $this->namespace = 'myapp/v1';
+        $this->namespace = 'crep/v1';
         $this->rest_base = 'test';
     }
 

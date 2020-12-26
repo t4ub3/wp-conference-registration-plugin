@@ -1,5 +1,5 @@
 <?php
-namespace App;
+namespace CReP;
 
 use WP_REST_Controller;
 

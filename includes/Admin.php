@@ -1,5 +1,5 @@
 <?php
-namespace App;
+namespace CReP;
 
 /**
  * Admin Pages Handler
@@ -21,7 +21,7 @@ class Admin {
         $capability = 'manage_options';
         $slug       = 'vue-app';
 
-        $hook = add_menu_page( __( 'Vue App', 'textdomain' ), __( 'Vue App', 'textdomain' ), $capability, $slug, [ $this, 'plugin_page' ], 'dashicons-text' );
+        $hook = add_menu_page( __( 'Conference Registration', 'textdomain' ), __( 'Conference Registration', 'textdomain' ), $capability, $slug, [ $this, 'plugin_page' ], 'dashicons-text' );
 
         if ( current_user_can( $capability ) ) {
             $submenu[ $slug ][] = array( __( 'App', 'textdomain' ), $capability, 'admin.php?page=' . $slug . '#/' );
@@ -46,8 +46,8 @@ class Admin {
      * @return void
      */
     public function enqueue_scripts() {
-        wp_enqueue_style( 'baseplugin-admin' );
-        wp_enqueue_script( 'baseplugin-admin' );
+        wp_enqueue_style( 'crep-admin' );
+        wp_enqueue_script( 'crep-admin' );
     }
 
     /**

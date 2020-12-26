@@ -1,5 +1,5 @@
 <?php
-namespace App;
+namespace CReP;
 
 /**
  * Scripts and Styles Class
@@ -36,7 +36,7 @@ class Assets {
         foreach ( $scripts as $handle => $script ) {
             $deps      = isset( $script['deps'] ) ? $script['deps'] : false;
             $in_footer = isset( $script['in_footer'] ) ? $script['in_footer'] : false;
-            $version   = isset( $script['version'] ) ? $script['version'] : BASEPLUGIN_VERSION;
+            $version   = isset( $script['version'] ) ? $script['version'] : CREP_VERSION;
 
             wp_register_script( $handle, $script['src'], $deps, $version, $in_footer );
         }
@@ -53,7 +53,7 @@ class Assets {
         foreach ( $styles as $handle => $style ) {
             $deps = isset( $style['deps'] ) ? $style['deps'] : false;
 
-            wp_register_style( $handle, $style['src'], $deps, BASEPLUGIN_VERSION );
+            wp_register_style( $handle, $style['src'], $deps, CREP_VERSION );
         }
     }
 
@@ -66,26 +66,26 @@ class Assets {
         $prefix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '.min' : '';
 
         $scripts = [
-            'baseplugin-runtime' => [
-                'src'       => BASEPLUGIN_ASSETS . '/js/runtime.js',
-                'version'   => filemtime( BASEPLUGIN_PATH . '/assets/js/runtime.js' ),
+            'crep-runtime' => [
+                'src'       => CREP_ASSETS . '/js/runtime.js',
+                'version'   => filemtime( CREP_PATH . '/assets/js/runtime.js' ),
                 'in_footer' => true
             ],
-            'baseplugin-vendor' => [
-                'src'       => BASEPLUGIN_ASSETS . '/js/vendors.js',
-                'version'   => filemtime( BASEPLUGIN_PATH . '/assets/js/vendors.js' ),
+            'crep-vendor' => [
+                'src'       => CREP_ASSETS . '/js/vendors.js',
+                'version'   => filemtime( CREP_PATH . '/assets/js/vendors.js' ),
                 'in_footer' => true
             ],
-            'baseplugin-frontend' => [
-                'src'       => BASEPLUGIN_ASSETS . '/js/frontend.js',
-                'deps'      => [ 'jquery', 'baseplugin-vendor', 'baseplugin-runtime' ],
-                'version'   => filemtime( BASEPLUGIN_PATH . '/assets/js/frontend.js' ),
+            'crep-frontend' => [
+                'src'       => CREP_ASSETS . '/js/frontend.js',
+                'deps'      => [ 'jquery', 'crep-vendor', 'crep-runtime' ],
+                'version'   => filemtime( CREP_PATH . '/assets/js/frontend.js' ),
                 'in_footer' => true
             ],
-            'baseplugin-admin' => [
-                'src'       => BASEPLUGIN_ASSETS . '/js/admin.js',
-                'deps'      => [ 'jquery', 'baseplugin-vendor', 'baseplugin-runtime' ],
-                'version'   => filemtime( BASEPLUGIN_PATH . '/assets/js/admin.js' ),
+            'crep-admin' => [
+                'src'       => CREP_ASSETS . '/js/admin.js',
+                'deps'      => [ 'jquery', 'crep-vendor', 'crep-runtime' ],
+                'version'   => filemtime( CREP_PATH . '/assets/js/admin.js' ),
                 'in_footer' => true
             ]
         ];
@@ -101,14 +101,14 @@ class Assets {
     public function get_styles() {
 
         $styles = [
-            'baseplugin-style' => [
-                'src' =>  BASEPLUGIN_ASSETS . '/css/style.css'
+            'crep-style' => [
+                'src' =>  CREP_ASSETS . '/css/style.css'
             ],
-            'baseplugin-frontend' => [
-                'src' =>  BASEPLUGIN_ASSETS . '/css/frontend.css'
+            'crep-frontend' => [
+                'src' =>  CREP_ASSETS . '/css/frontend.css'
             ],
-            'baseplugin-admin' => [
-                'src' =>  BASEPLUGIN_ASSETS . '/css/admin.css'
+            'crep-admin' => [
+                'src' =>  CREP_ASSETS . '/css/admin.css'
             ],
         ];
 
