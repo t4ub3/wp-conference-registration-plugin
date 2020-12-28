@@ -74,7 +74,6 @@ final class CReP {
 
         register_activation_hook( __FILE__, array( $this, 'activate' ) );
         register_deactivation_hook( __FILE__, array( $this, 'deactivate' ) );
-        register_uninstall_hook( __FILE__, array( $this, 'uninstall' ) );
 
         add_action( 'plugins_loaded', array( $this, 'init_plugin' ) );
     }
@@ -174,12 +173,6 @@ final class CReP {
         if (  $installed ) {
             delete_option( 'crep_installed' );
         }
-    }
-
-    public function uninstall() {
-        include_once( plugin_dir_path( __FILE__ ) . 'includes/DatabaseSetup.php' );
-        crep_drop_tables();
-        delete_option( 'crep_version' );
     }
 
     /**
