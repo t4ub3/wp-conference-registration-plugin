@@ -78,23 +78,6 @@ function crep_setup_tables() {
     ");
 }
 
-function crep_drop_tables() {
-    global $wpdb;
 
-    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-    $charset_collate = $wpdb->get_charset_collate() . ' engine = innoDB';
-
-    $prefix = $wpdb->prefix . 'crep_';
-
-    $tables = array("events", "seminars", "timeslots", "registrations", "speakers", "tags", 
-                    "registrations_to_seminars", "tags_to_seminars", "speakers_to_seminars");
-    foreach ($tables as &$value) {
-        $value = $prefix .  $value;
-    }
-    unset($value);
-
-    $sql = "DROP TABLE IF EXISTS " . implode(", ", $tables) . ";";
-    dbDelta( $sql );
-}
 
 ?>
