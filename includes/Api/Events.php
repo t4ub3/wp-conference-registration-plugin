@@ -37,21 +37,28 @@ class Events extends WP_REST_Controller {
                     'methods'             => \WP_REST_Server::DELETABLE,
                     'callback'            => array( $this, 'delete_events' ),
                     'permission_callback' => array( $this, 'check_admin' ),
+                ),
+                array(
+                    'methods'             => \WP_REST_Server::CREATABLE,
+                    'callback'            => array( $this, 'create_event' ),
+                    'permission_callback' => array( $this, 'check_admin' ),
                 )
             )
         );
-
-        // register_rest_route(
-        //     $this->namespace,
-        //     '/' . $this->rest_base,
-        //     array(
-        //         array(
-        //             'methods'             => \WP_REST_Server::DELETABLE,
-        //             'callback'            => array( $this, 'delete_events' ),
-        //             'permission_callback' => array( $this, 'check_admin' ),
-        //         )
-        //     )
-        // );
+        register_rest_route(
+            $this->namespace,
+            '/' . $this->rest_base . '/(?P<id>\d+)',
+            array(
+                array(
+                    'methods'             => \WP_REST_Server::EDITABLE,
+                    'callback'            => array( $this, 'update_event' ),
+                    'permission_callback' => array( $this, 'check_admin' ),
+                    'args' => [
+                        'id'
+                    ]
+                )
+            )
+        );
     }
 
     /**
@@ -68,7 +75,6 @@ class Events extends WP_REST_Controller {
         $list = $wpdb->get_results($query);
 
         return rest_ensure_response( $list );
-
     }
 
     /**
@@ -93,6 +99,69 @@ class Events extends WP_REST_Controller {
             }
         } else {
             $response = array("error" => "Es fehlen IDs, um Events zu löschen.");
+        }
+
+        return rest_ensure_response( $response );
+    }
+
+
+    /**
+     * Creates a new event.
+     *
+     * @param WP_REST_Request $request Full details about the request.
+     *
+     * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+     */
+    public function create_event($request) {
+        global $wpdb;
+        $response = NULL;
+
+        $parameters = $request->get_params();
+        if ($parameters["name"] && $parameters["contact_mail"] && $parameters["default_slot_max"]) {
+            $result = $wpdb->insert("{$this->prefix}events", array(
+                'name' => $parameters["name"],
+                'contact_mail' => $parameters["contact_mail"],
+                'default_slot_max' => $parameters["default_slot_max"]
+            ));
+    
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+            } else {
+                $response = array("success" => "Neues Event gespeichert!", "result" => $result);
+            }
+        } else {
+            $response = array("error" => "Bitte geben Sie mindestens den Namen, den Kontakt und die max. Teilnehmeranzahl an!");
+        }
+
+        return rest_ensure_response( $response );
+    }
+
+    /**
+     * Updates an event.
+     *
+     * @param WP_REST_Request $request Full details about the request.
+     *
+     * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+     */
+    public function update_event($request) {
+        global $wpdb;
+        $response = NULL;
+
+        $parameters = $request->get_params();
+        if ($request["id"] && $parameters["name"] && $parameters["contact_mail"] && $parameters["default_slot_max"]) {
+            $result = $wpdb->update("{$this->prefix}events", array(
+                'name' => $parameters["name"],
+                'contact_mail' => $parameters["contact_mail"],
+                'default_slot_max' => $parameters["default_slot_max"]
+            ), array('id' => $request["id"]));
+    
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+            } else {
+                $response = array("success" => "Aktualisiertes Event gespeichert!", "result" => $result);
+            }
+        } else {
+            $response = array("error" => "Bitte geben Sie mindestens die ID, den Namen, den Kontakt und die max. Teilnehmeranzahl an!");
         }
 
         return rest_ensure_response( $response );

@@ -19,6 +19,22 @@ export async function deleteEvents(ids) {
     });
 }
 
+export async function createEvent(event) {
+    return await safeRequest({
+        method: "post",
+        url: `${baseUrl}events`,
+        data: event
+    });
+}
+
+export async function updateEvent(event) {
+    return await safeRequest({
+        method: "put",
+        url: `${baseUrl}events/${event.id}`,
+        data: event
+    });
+}
+
 async function safeRequest(axiosConfig) {
     try {
         const response = await axios(axiosConfig);

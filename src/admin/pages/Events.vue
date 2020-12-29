@@ -1,6 +1,11 @@
 <template>
   <div class="events">
-    <h1>Events</h1>
+    <div>
+      <h1 class="events__headline">Events</h1>
+      <router-link to="/new-event" class="page-title-action">
+        Neues Event erstellen
+      </router-link>
+    </div>
     <list-table
       :rows="items"
       :perPage="per_page"
@@ -102,6 +107,8 @@ export default {
             alert(row.name + " gelöscht!");
           }
         }
+      } else if ("edit" === action) {
+        this.$router.push({name: "EditEvent", params: row })
       }
     },
 
@@ -124,4 +131,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+  .events__headline {
+    display: inline-block;
+  }
 </style>
