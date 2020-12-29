@@ -24,8 +24,9 @@ class Admin {
         $hook = add_menu_page( __( 'Conference Registration', 'textdomain' ), __( 'Conference Registration', 'textdomain' ), $capability, $slug, [ $this, 'plugin_page' ], 'dashicons-text' );
 
         if ( current_user_can( $capability ) ) {
-            $submenu[ $slug ][] = array( __( 'App', 'textdomain' ), $capability, 'admin.php?page=' . $slug . '#/' );
-            $submenu[ $slug ][] = array( __( 'Settings', 'textdomain' ), $capability, 'admin.php?page=' . $slug . '#/settings' );
+            $submenu[ $slug ][] = array( __( 'Events', 'textdomain' ), $capability, 'admin.php?page=' . $slug . '#/' );
+            $submenu[ $slug ][] = array( __( 'Redner', 'textdomain' ), $capability, 'admin.php?page=' . $slug . '#/speakers' );
+            $submenu[ $slug ][] = array( __( 'Übersicht / Export', 'textdomain' ), $capability, 'admin.php?page=' . $slug . '#/export' );
         }
 
         add_action( 'load-' . $hook, [ $this, 'init_hooks'] );
@@ -48,6 +49,11 @@ class Admin {
     public function enqueue_scripts() {
         wp_enqueue_style( 'crep-admin' );
         wp_enqueue_script( 'crep-admin' );
+        wp_localize_script( 'crep-admin', 'crep', array(
+            'rest_url' => esc_url_raw( rest_url() ),
+            'nonce' => wp_create_nonce( 'wp_rest' ),
+            'admin' => current_user_can('administrator')
+        ));
     }
 
     /**
