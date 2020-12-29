@@ -19,13 +19,13 @@ class Admin {
         global $submenu;
 
         $capability = 'manage_options';
-        $slug       = 'vue-app';
+        $slug       = 'crep';
 
         $hook = add_menu_page( __( 'Conference Registration', 'textdomain' ), __( 'Conference Registration', 'textdomain' ), $capability, $slug, [ $this, 'plugin_page' ], 'dashicons-text' );
 
         if ( current_user_can( $capability ) ) {
             $submenu[ $slug ][] = array( __( 'Events', 'textdomain' ), $capability, 'admin.php?page=' . $slug . '#/' );
-            $submenu[ $slug ][] = array( __( 'Redner', 'textdomain' ), $capability, 'admin.php?page=' . $slug . '#/speakers' );
+            $submenu[ $slug ][] = array( __( 'Referenten', 'textdomain' ), $capability, 'admin.php?page=' . $slug . '#/speakers' );
             $submenu[ $slug ][] = array( __( 'Übersicht / Export', 'textdomain' ), $capability, 'admin.php?page=' . $slug . '#/export' );
         }
 

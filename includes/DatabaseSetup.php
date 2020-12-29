@@ -57,7 +57,7 @@ function crep_setup_tables() {
     create_crep_table("speakers", "
         first_name varchar(50) NOT NULL,
         surname varchar(50) NOT NULL,
-        description text NOT NULL, 
+        description text, 
         path_to_picture varchar(500),
         location varchar(50),
     ");

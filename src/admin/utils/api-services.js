@@ -4,6 +4,8 @@ const restRoot = window.crep ? window.crep.rest_url : "http://127.0.0.1:8000/wp-
 const baseUrl = restRoot + "crep/v1/";
 axios.defaults.headers.common["X-WP-Nonce"] = window.crep ? window.crep.nonce : null;
 
+// ===== Events Api =========================================================== //
+
 export async function getEvents() {
     return await safeRequest({
         method: "get",
@@ -34,6 +36,47 @@ export async function updateEvent(event) {
         data: event
     });
 }
+
+// ===== Speakers Api ========================================================= //
+
+export async function getSpeakers() {
+    return await safeRequest({
+        method: "get",
+        url: `${baseUrl}speakers`
+    });
+}
+
+export async function deleteSpeakers(ids) {
+    return await safeRequest({
+        method: "delete",
+        url: `${baseUrl}speakers`,
+        data: {ids: ids}
+    });
+}
+
+export async function createSpeaker(speaker) {
+    return await safeRequest({
+        method: "post",
+        url: `${baseUrl}speakers`,
+        data: speaker
+    });
+}
+
+export async function updateSpeaker(speaker) {
+    return await safeRequest({
+        method: "put",
+        url: `${baseUrl}speakers/${speaker.id}`,
+        data: speaker
+    });
+}
+
+// ===== Tags Api ============================================================= //
+
+// ===== Timeslots Api ======================================================== //
+
+// ===== Registrations Api ==================================================== //
+
+// ===== Seminars Api ========================================================= //
 
 async function safeRequest(axiosConfig) {
     try {
