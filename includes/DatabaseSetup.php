@@ -30,7 +30,7 @@ function crep_setup_tables() {
 
     create_crep_table("timeslots", "
         name varchar(50) NOT NULL,
-        event_id int(9),
+        event_id int(9) NOT NULL,
     ");
 
     create_crep_table("seminars", "
@@ -39,10 +39,12 @@ function crep_setup_tables() {
         slot_max smallint(4), 
         number smallint(4), 
         timeslot_id int(9),
+        event_id int(9) NOT NULL,
     ");
     
     create_crep_table("tags", "
         name varchar(50) NOT NULL,
+        event_id int(9) NOT NULL,
     ");
 
     create_crep_table("registrations", "
@@ -51,7 +53,7 @@ function crep_setup_tables() {
         contact_mail text NOT NULL, 
         registration_date timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL, 
         additional_params text,
-        event_id int(9),
+        event_id int(9) NOT NULL,
     ");
 
     create_crep_table("speakers", "

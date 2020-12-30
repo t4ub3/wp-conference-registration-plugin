@@ -60,10 +60,6 @@ export default {
       },
       actions: [
         {
-          key: "seminars",
-          label: "Seminare",
-        },
-        {
           key: "edit",
           label: "Bearbeiten",
         },

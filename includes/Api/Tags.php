@@ -6,7 +6,7 @@ use WP_REST_Controller;
 /**
  * REST_API Handler
  */
-class Speakers extends WP_REST_Controller {
+class Tags extends WP_REST_Controller {
 
     /**
      * [__construct description]
@@ -14,7 +14,7 @@ class Speakers extends WP_REST_Controller {
     public function __construct() {
         global $wpdb;
         $this->namespace = 'crep/v1';
-        $this->rest_base = 'speakers';
+        $this->rest_base = 'tags';
         $this->prefix = $wpdb->prefix . 'crep_';
     }
 
@@ -30,17 +30,17 @@ class Speakers extends WP_REST_Controller {
             array(
                 array(
                     'methods'             => \WP_REST_Server::READABLE,
-                    'callback'            => array( $this, 'get_speakers' ),
+                    'callback'            => array( $this, 'get_tags' ),
                     'permission_callback' => array( $this, 'check_admin' ),
                 ),
                 array(
                     'methods'             => \WP_REST_Server::DELETABLE,
-                    'callback'            => array( $this, 'delete_speakers' ),
+                    'callback'            => array( $this, 'delete_tags' ),
                     'permission_callback' => array( $this, 'check_admin' ),
                 ),
                 array(
                     'methods'             => \WP_REST_Server::CREATABLE,
-                    'callback'            => array( $this, 'create_speaker' ),
+                    'callback'            => array( $this, 'create_tag' ),
                     'permission_callback' => array( $this, 'check_admin' ),
                 )
             )
@@ -51,7 +51,7 @@ class Speakers extends WP_REST_Controller {
             array(
                 array(
                     'methods'             => \WP_REST_Server::EDITABLE,
-                    'callback'            => array( $this, 'update_speaker' ),
+                    'callback'            => array( $this, 'update_tag' ),
                     'permission_callback' => array( $this, 'check_admin' ),
                     'args' => [
                         'id'
@@ -62,43 +62,46 @@ class Speakers extends WP_REST_Controller {
     }
 
     /**
-     * Retrieves a collection of speakers.
+     * Retrieves a collection of tags.
      *
      * @param WP_REST_Request $request Full details about the request.
      *
      * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
      */
-    public function get_speakers() {
+    public function get_tags($request) {
         global $wpdb;
-
-        $query = "SELECT * FROM `{$this->prefix}speakers`";
-        $list = $wpdb->get_results($query);
-
-        return rest_ensure_response( $list );
+        $response = NULL;
+        if ($request["event_id"]) {
+            $query = "SELECT * FROM `{$this->prefix}tags` WHERE event_id = {$request["event_id"]}";
+            $response = $wpdb->get_results($query);
+        } else {
+            $response = array("error" => "Keine Event ID angegeben");
+        }
+        return rest_ensure_response( $response );
     }
 
     /**
-     * Deletes a collection of speakers.
+     * Deletes a collection of tags.
      *
      * @param WP_REST_Request $request Full details about the request.
      *
      * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
      */
-    public function delete_speakers($request) {
+    public function delete_tags($request) {
         global $wpdb;
         $response = NULL;
 
         $parameters = $request->get_params();
         if ($parameters["ids"]) {
             $ids = implode( ',', array_map( 'intval', $parameters["ids"] ) );
-            $count = $wpdb->query( "DELETE FROM `{$this->prefix}speakers` WHERE id IN($ids)" );
+            $count = $wpdb->query( "DELETE FROM `{$this->prefix}tags` WHERE id IN($ids)" );
             if ($count <= 0) {
-                $response = array("error" => "Fehler beim Löschen - keine Referenten gelöscht.");
+                $response = array("error" => "Fehler beim Löschen - keine Tags gelöscht.");
             } else {
-                $response = array("success" => "$count Referenten gelöscht!");
+                $response = array("success" => "$count Tags gelöscht!");
             }
         } else {
-            $response = array("error" => "Es fehlen IDs, um Referenten zu löschen.");
+            $response = array("error" => "Es fehlen IDs, um Tags zu löschen.");
         }
 
         return rest_ensure_response( $response );
@@ -106,66 +109,59 @@ class Speakers extends WP_REST_Controller {
 
 
     /**
-     * Creates a new speaker.
+     * Creates a new tag.
      *
      * @param WP_REST_Request $request Full details about the request.
      *
      * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
      */
-    public function create_speaker($request) {
+    public function create_tag($request) {
         global $wpdb;
         $response = NULL;
 
         $parameters = $request->get_params();
-        if ($parameters["first_name"] && $parameters["surname"]) {
-            $result = $wpdb->insert("{$this->prefix}speakers", array(
-                'first_name' => $parameters["first_name"],
-                'surname' => $parameters["surname"],
-                'description' => $parameters["description"] ?: NULL,
-                'path_to_picture' => $parameters["path_to_picture"] ?: NULL,
-                'location' => $parameters["location"] ?: NULL,
+        if ($parameters["name"] && $parameters["event_id"]) {
+            $result = $wpdb->insert("{$this->prefix}tags", array(
+                'name' => $parameters["name"],
+                'event_id' => $parameters["event_id"],
             ));
     
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
             } else {
-                $response = array("success" => "Neuer Referent gespeichert!", "result" => $result);
+                $response = array("success" => "Neues Tag gespeichert!", "result" => $result);
             }
         } else {
-            $response = array("error" => "Bitte geben Sie mindestens den Vor- und Nachnamen an!");
+            $response = array("error" => "Bitte geben Sie den Namen und die Event ID an!");
         }
 
         return rest_ensure_response( $response );
     }
 
     /**
-     * Updates a speaker.
+     * Updates a tag.
      *
      * @param WP_REST_Request $request Full details about the request.
      *
      * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
      */
-    public function update_speaker($request) {
+    public function update_tag($request) {
         global $wpdb;
         $response = NULL;
 
         $parameters = $request->get_params();
-        if ($parameters["first_name"] && $parameters["surname"]) {
-            $result = $wpdb->update("{$this->prefix}speakers", array(
-                'first_name' => $parameters["first_name"],
-                'surname' => $parameters["surname"],
-                'description' => $parameters["description"] ?: NULL,
-                'path_to_picture' => $parameters["path_to_picture"] ?: NULL,
-                'location' => $parameters["location"] ?: NULL,
+        if ($parameters["name"]) {
+            $result = $wpdb->update("{$this->prefix}tags", array(
+                'name' => $parameters["name"],
             ), array('id' => $request["id"]));
     
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
             } else {
-                $response = array("success" => "Daten des Referenten aktualisiert!", "result" => $result);
+                $response = array("success" => "Aktualisiertes Tag gespeichert!", "result" => $result);
             }
         } else {
-            $response = array("error" => "Bitte geben Sie mindestens den Vor- und Nachnamen an!");
+            $response = array("error" => "Bitte geben Sie den Namen an!");
         }
 
         return rest_ensure_response( $response );

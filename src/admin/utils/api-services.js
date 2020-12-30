@@ -7,10 +7,14 @@ axios.defaults.headers.common["X-WP-Nonce"] = window.crep ? window.crep.nonce : 
 // ===== Events Api =========================================================== //
 
 export async function getEvents() {
-    return await safeRequest({
+    const untypedResult = await safeRequest({
         method: "get",
         url: `${baseUrl}events`
     });
+
+    return untypedResult.map(event => ({
+        ...event, id: parseInt(event.id), default_slot_max: parseInt(event.default_slot_max)
+    }))
 }
 
 export async function deleteEvents(ids) {
@@ -40,10 +44,14 @@ export async function updateEvent(event) {
 // ===== Speakers Api ========================================================= //
 
 export async function getSpeakers() {
-    return await safeRequest({
+    const untypedResult = await safeRequest({
         method: "get",
         url: `${baseUrl}speakers`
     });
+
+    return untypedResult.map(speaker => ({
+        ...speaker, id: parseInt(speaker.id)
+    }))
 }
 
 export async function deleteSpeakers(ids) {
@@ -71,6 +79,42 @@ export async function updateSpeaker(speaker) {
 }
 
 // ===== Tags Api ============================================================= //
+
+export async function getTags(event_id) {
+    const untypedResult = await safeRequest({
+        method: "get",
+        url: `${baseUrl}tags`,
+        params: {event_id: event_id}
+    });
+
+    return untypedResult.map(tag => ({
+        ...tag, id: parseInt(tag.id), event_id: parseInt(tag.event_id)
+    }))
+}
+
+export async function deleteTags(ids) {
+    return await safeRequest({
+        method: "delete",
+        url: `${baseUrl}tags`,
+        data: {ids: ids}
+    });
+}
+
+export async function createTag(tag) {
+    return await safeRequest({
+        method: "post",
+        url: `${baseUrl}tags`,
+        data: tag
+    });
+}
+
+export async function updateTag(tag) {
+    return await safeRequest({
+        method: "put",
+        url: `${baseUrl}tags/${tag.id}`,
+        data: tag
+    });
+}
 
 // ===== Timeslots Api ======================================================== //
 

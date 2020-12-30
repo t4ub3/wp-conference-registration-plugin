@@ -1,21 +1,23 @@
 <template>
   <div>
-    <h1>Event bearbeiten</h1>
+    <h1>{{ name }}</h1>
     <edit-event-form
       button-text="Aktualisieren"
       @event-submit="updateEvent"
       :event="{ name, contact_mail, default_slot_max }"
     ></edit-event-form>
+    <tag-editor :event_id="id"> </tag-editor>
   </div>
 </template>
 
 <script>
 import EditEventForm from "../components/EditEventForm.vue";
+import TagEditor from "../components/TagEditor.vue";
 import { updateEvent } from "../utils/api-services";
 
 export default {
   name: "EditEvent",
-  components: { EditEventForm },
+  components: { EditEventForm, TagEditor },
   props: {
     name: {
       type: String,
