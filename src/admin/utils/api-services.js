@@ -116,7 +116,43 @@ export async function updateTag(tag) {
     });
 }
 
-// ===== Timeslots Api ======================================================== //
+// ===== Sessions Api ======================================================== //
+
+export async function getSessions(event_id) {
+    const untypedResult = await safeRequest({
+        method: "get",
+        url: `${baseUrl}sessions`,
+        params: {event_id: event_id}
+    });
+
+    return untypedResult.map(session => ({
+        ...session, id: parseInt(session.id), event_id: parseInt(session.event_id)
+    }))
+}
+
+export async function deleteSessions(ids) {
+    return await safeRequest({
+        method: "delete",
+        url: `${baseUrl}sessions`,
+        data: {ids: ids}
+    });
+}
+
+export async function createSession(session) {
+    return await safeRequest({
+        method: "post",
+        url: `${baseUrl}sessions`,
+        data: session
+    });
+}
+
+export async function updateSession(session) {
+    return await safeRequest({
+        method: "put",
+        url: `${baseUrl}sessions/${session.id}`,
+        data: session
+    });
+}
 
 // ===== Registrations Api ==================================================== //
 

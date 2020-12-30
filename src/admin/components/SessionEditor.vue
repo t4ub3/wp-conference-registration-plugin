@@ -1,18 +1,18 @@
 <template>
-  <div class="tag-editor">
-    <h1>Schlagwörter</h1>
+  <div class="session-editor">
+    <h1>Sessions</h1>
     <div id="col-container" class="wp-clearfix">
       <div id="col-left">
         <div class="col-wrap">
-          <h2>Neues Schlagwort erstellen</h2>
-          <form @submit="submit" class="edit-tag-form form-wrap">
+          <h2>Neue Session erstellen</h2>
+          <form @submit="submit" class="edit-session-form form-wrap">
             <div class="form-field">
-              <label for="crep-tag-name">Name</label>
-              <input id="crep-tag-name" v-model="newTag.name" type="text" />
+              <label for="crep-session-name">Name</label>
+              <input id="crep-session-name" v-model="newSession.name" type="text" />
             </div>
             <p class="submit">
               <button class="button button-primary" type="submit">
-                Neues Schlagwort erstellen
+                Neue Session erstellen
               </button>
             </p>
           </form>
@@ -21,7 +21,7 @@
       <div id="col-right">
         <div class="col-wrap">
           <list-table
-            :rows="tags"
+            :rows="sessions"
             :perPage="per_page"
             :text="text"
             :columns="columns"
@@ -34,7 +34,7 @@
           >
             <template slot="name" slot-scope="data">
               <div v-if="!data.row.editing">{{ data.row.name }}</div>
-              <form class="tag-editor__update-form" v-else @submit="(event) => submitUpdate(event, data.row)">
+              <form class="session-editor__update-form" v-else @submit="(event) => submitUpdate(event, data.row)">
                 <input type="text" v-model="data.row.name" />
                 <button class="button button-primary" type="submit">Speichern</button>
               </form>
@@ -48,16 +48,16 @@
 
 <script>
 import {
-  createTag,
-  deleteTags,
-  getTags,
-  updateTag,
+  createSession,
+  deleteSessions,
+  getSessions,
+  updateSession,
 } from "../utils/api-services";
 import ListTable from "vue-wp-list-table";
 import "vue-wp-list-table/dist/vue-wp-list-table.css";
 
 export default {
-  name: "TagEditor",
+  name: "SessionEditor",
   components: { ListTable },
   props: {
     event_id: {
@@ -67,11 +67,11 @@ export default {
   },
   data() {
     return {
-      newTag: {
+      newSession: {
         name: "",
         event_id: this.event_id,
       },
-      tags: [],
+      sessions: [],
       per_page: 50,
       text: {
         select_bulk_action: "Mehrfachaktionen auswählen",
@@ -106,39 +106,39 @@ export default {
     };
   },
   created() {
-    this.loadTags();
+    this.loadSessions();
   },
   methods: {
-    async loadTags() {
-      const result = await getTags(this.event_id);
+    async loadSessions() {
+      const result = await getSessions(this.event_id);
       if (result.error) {
         alert(result.error);
         return;
       }
-      this.tags = result.map((tag) => ({ ...tag, editing: false }));
-      this.per_page = this.tags.length;
+      this.sessions = result.map((session) => ({ ...session, editing: false }));
+      this.per_page = this.sessions.length;
     },
 
     async submit(event) {
       event.preventDefault();
-      const result = await createTag(this.newTag);
+      const result = await createSession(this.newSession);
       if (result.error) {
         alert(result.error);
       } else {
-        alert(`Schlagwort ${this.newTag.name} wurde angelegt!`);
-        this.newTag.name = "";
-        this.loadTags();
+        alert(`Session ${this.newSession.name} wurde angelegt!`);
+        this.newSession.name = "";
+        this.loadSessions();
       }
     },
 
     async onActionClick(action, row) {
       if ("delete" === action) {
-        if (confirm("Schlagwort " + row.name + " wirklich löschen?")) {
-          const result = await deleteTags([row.id]);
+        if (confirm("Session " + row.name + " wirklich löschen?")) {
+          const result = await deleteSessions([row.id]);
           if (result.error) {
             alert(result.error);
           } else {
-            this.loadTags();
+            this.loadSessions();
             alert(row.name + " gelöscht!");
           }
         }
@@ -149,12 +149,12 @@ export default {
 
     async onBulkActionClick(action, rowIds) {
       if ("delete" === action) {
-        if (confirm("Gewählte Schlagwörter wirklich löschen?")) {
-          const result = await deleteTags(rowIds);
+        if (confirm("Gewählte Sessions wirklich löschen?")) {
+          const result = await deleteSessions(rowIds);
           if (result.error) {
             alert(result.error);
           } else {
-            this.loadTags();
+            this.loadSessions();
             alert(result.success);
           }
         }
@@ -163,11 +163,11 @@ export default {
 
     async submitUpdate(event, row) {
       event.preventDefault();
-      const result = await updateTag(row);
+      const result = await updateSession(row);
       if (result.error) {
         alert(result.error);
       } else {
-        this.loadTags();
+        this.loadSessions();
       }
     },
   },
@@ -175,10 +175,10 @@ export default {
 </script>
 
 <style scoped>
-.tag-editor {
+.session-editor {
   padding-top: 30px;
 }
-.tag-editor__update-form {
+.session-editor__update-form {
     display: flex;
 }
 </style>

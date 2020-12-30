@@ -28,7 +28,7 @@ function crep_setup_tables() {
         additional_params text,
     ");
 
-    create_crep_table("timeslots", "
+    create_crep_table("sessions", "
         name varchar(50) NOT NULL,
         event_id int(9) NOT NULL,
     ");
@@ -38,7 +38,7 @@ function crep_setup_tables() {
         description text NOT NULL, 
         slot_max smallint(4), 
         number smallint(4), 
-        timeslot_id int(9),
+        session_id int(9),
         event_id int(9) NOT NULL,
     ");
     
