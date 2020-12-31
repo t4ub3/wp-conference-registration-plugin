@@ -35,10 +35,9 @@ function crep_setup_tables() {
 
     create_crep_table("seminars", "
         name varchar(50) NOT NULL, 
-        description text NOT NULL, 
+        description text, 
         slot_max smallint(4), 
-        number smallint(4), 
-        session_id int(9),
+        number smallint(4),
         event_id int(9) NOT NULL,
     ");
     
@@ -64,9 +63,14 @@ function crep_setup_tables() {
         location varchar(50),
     ");
 
-    create_crep_table("registrations_to_seminars", "
-        registration_id int(9) NOT NULL,
+    create_crep_table("sessions_to_seminars", "
+        session_id int(9) NOT NULL,
         seminar_id int(9) NOT NULL,
+    ");
+
+    create_crep_table("registrations_to_seminar_in_session", "
+        registration_id int(9) NOT NULL,
+        session_to_seminar_id int(9) NOT NULL,
     ");
 
     create_crep_table("tags_to_seminars", "

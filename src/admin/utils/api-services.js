@@ -158,6 +158,44 @@ export async function updateSession(session) {
 
 // ===== Seminars Api ========================================================= //
 
+export async function getSeminars(event_id) {
+    const untypedResult = await safeRequest({
+        method: "get",
+        url: `${baseUrl}seminars`,
+        params: {event_id: event_id}
+    });
+
+    return untypedResult.map(seminar => ({
+        ...seminar, id: parseInt(seminar.id), event_id: parseInt(seminar.event_id)
+    }))
+}
+
+export async function deleteSeminars(ids) {
+    return await safeRequest({
+        method: "delete",
+        url: `${baseUrl}seminars`,
+        data: {ids: ids}
+    });
+}
+
+export async function createSeminar(seminar) {
+    return await safeRequest({
+        method: "post",
+        url: `${baseUrl}seminars`,
+        data: seminar
+    });
+}
+
+export async function updateSeminar(seminar) {
+    return await safeRequest({
+        method: "put",
+        url: `${baseUrl}seminars/${seminar.id}`,
+        data: session
+    });
+}
+
+// ===== Helpers ============================================================== //
+
 async function safeRequest(axiosConfig) {
     try {
         const response = await axios(axiosConfig);

@@ -22,7 +22,7 @@
       <tr class="form-field">
         <th scope="row">Beschreibung</th>
         <td>
-          <input id="crep-description" v-model="newSpeaker.description" type="text" />
+          <textarea id="crep-description" v-model="newSpeaker.description" />
         </td>
       </tr>
       <tr class="form-field">

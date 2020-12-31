@@ -92,6 +92,7 @@ class Events extends WP_REST_Controller {
         if ($parameters["ids"]) {
             $ids = implode( ',', array_map( 'intval', $parameters["ids"] ) );
             $count = $wpdb->query( "DELETE FROM `{$this->prefix}events` WHERE id IN($ids)" );
+            // TODO: delete tags, sessions, seminars, registrations
             if ($count <= 0) {
                 $response = array("error" => "Fehler beim Löschen - keine Events gelöscht.");
             } else {
