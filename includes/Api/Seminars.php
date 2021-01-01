@@ -260,45 +260,55 @@ class Seminars extends WP_REST_Controller
      */
     public function get_seminar($request) {
         global $wpdb;
-        $response = array();
+        $response = NULL;
 
         if ($request["id"]) {
             $seminar_id = $request["id"];
             $event_query = "SELECT * FROM `{$this->prefix}seminars` WHERE id = {$seminar_id};";
-            $list = $wpdb->get_results($event_query);
+            $list = $wpdb->get_results($event_query, "ARRAY_A");
     
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
                 return rest_ensure_response( $response );
             }
-            $response["seminar_data"] = $list[0];
+            $response = $list[0];
 
             $sessions_query = "SELECT session_id FROM `{$this->prefix}sessions_to_seminars` WHERE seminar_id = {$seminar_id};";
-            $list = $wpdb->get_results($sessions_query);
+            $list = $wpdb->get_results($sessions_query, "ARRAY_A");
     
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
                 return rest_ensure_response( $response );
             }
-            $response["sessions_data"] = $list;
+
+            $response["session_ids"] = array();
+            foreach ($list as $session_row) {
+                array_push($response["session_ids"], $session_row["session_id"]);
+            }
 
             $speakers_query = "SELECT speaker_id FROM `{$this->prefix}speakers_to_seminars` WHERE seminar_id = {$seminar_id};";
-            $list = $wpdb->get_results($speakers_query);
+            $list = $wpdb->get_results($speakers_query, "ARRAY_A");
     
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
                 return rest_ensure_response( $response );
             }
-            $response["speakers_data"] = $list;
+            $response["speaker_ids"] = array();
+            foreach ($list as $speaker_row) {
+                array_push($response["speaker_ids"], $speaker_row["speaker_id"]);
+            }
 
             $tags_query = "SELECT tag_id FROM `{$this->prefix}tags_to_seminars` WHERE seminar_id = {$seminar_id};";
-            $list = $wpdb->get_results($tags_query);
+            $list = $wpdb->get_results($tags_query, "ARRAY_A");
     
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
                 return rest_ensure_response( $response );
             }
-            $response["tags_data"] = $list;
+            $response["tag_ids"] = array();
+            foreach ($list as $tag_row) {
+                array_push($response["tag_ids"], $tag_row["tag_id"]);
+            }
         } else {
             $response = array("error" => "Bitte geben Sie die Seminar ID an!");
         }

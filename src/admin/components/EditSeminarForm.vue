@@ -148,43 +148,43 @@ export default {
 
     if (this.seminarId) {
       seminar = await getSeminar(this.$route.params.seminar_id);
-      this.newSeminar.name = seminar.seminar_data.name;
-      this.newSeminar.number = seminar.seminar_data.number;
-      this.newSeminar.description = seminar.seminar_data.description;
-      this.newSeminar.slot_max = seminar.seminar_data.slot_max;
+      this.newSeminar.name = seminar.name;
+      this.newSeminar.number = seminar.number;
+      this.newSeminar.description = seminar.description;
+      this.newSeminar.slot_max = seminar.slot_max;
     }
 
     this.event = await getEvent(this.eventId);
-    this.event.sessions_data.forEach((session) => {
+    this.event.sessions.forEach((session) => {
       this.sessionsOptions.push({
         name: session.name,
         code: session.id,
       });
-      if (seminar && seminar.sessions_data.includes(session.id)) {
+      if (seminar && seminar.session_ids.includes(session.id)) {
         this.sessionsValue.push({
           name: session.name,
           code: session.id,
         });
       }
     });
-    this.event.speakers_data.forEach((speaker) => {
+    this.event.speakers.forEach((speaker) => {
       this.speakersOptions.push({
         name: `${speaker.first_name} ${speaker.surname}`,
         code: speaker.id,
       });
-      if (seminar && seminar.speakers_data.includes(speaker.id)) {
+      if (seminar && seminar.speaker_ids.includes(speaker.id)) {
         this.speakersValue.push({
           name: `${speaker.first_name} ${speaker.surname}`,
           code: speaker.id,
         });
       }
     });
-    this.event.tags_data.forEach((tag) => {
+    this.event.tags.forEach((tag) => {
       this.tagsOptions.push({
         name: tag.name,
         code: tag.id,
       });
-      if (seminar && seminar.tags_data.includes(tag.id)) {
+      if (seminar && seminar.tag_ids.includes(tag.id)) {
         this.tagsValue.push({
           name: tag.name,
           code: tag.id,

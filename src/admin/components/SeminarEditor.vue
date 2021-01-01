@@ -114,7 +114,7 @@ export default {
           }
         }
       } else if ("edit" === action) {
-        this.$router.push({path: `/${this.event_id}/edit-seminar/${row.id}` })
+        this.$router.push({path: `/${this.event_id}/edit-seminar/${row.id}` });
       }
     },
 

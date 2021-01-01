@@ -60,6 +60,10 @@ export default {
   name: "TagEditor",
   components: { ListTable },
   props: {
+    tagsPreloaded: {
+      type: Array,
+      default: () => ([])
+    },
     event_id: {
       type: Number,
       required: true,
@@ -71,7 +75,7 @@ export default {
         name: "",
         event_id: this.event_id,
       },
-      tags: [],
+      tags: this.tagsPreloaded.map((tag) => ({ ...tag, editing: false })),
       per_page: 50,
       text: {
         select_bulk_action: "Mehrfachaktionen auswählen",
@@ -106,7 +110,9 @@ export default {
     };
   },
   created() {
-    this.loadTags();
+    if (!this.tags.length) {
+      this.loadTags();
+    }
   },
   methods: {
     async loadTags() {

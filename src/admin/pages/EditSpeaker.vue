@@ -1,43 +1,29 @@
 <template>
   <div>
     <h1>Referent bearbeiten</h1>
-    <edit-speaker-form
+    <edit-speaker-form v-if="speaker"
       button-text="Aktualisieren"
       @speaker-submit="updateSpeaker"
-      :speaker="{ first_name, surname, location, description, path_to_picture }"
+      :speaker="speaker"
     ></edit-speaker-form>
   </div>
 </template>
 
 <script>
 import EditSpeakerForm from "../components/EditSpeakerForm.vue";
-import { updateSpeaker } from "../utils/api-services";
+import { getSpeaker, updateSpeaker } from "../utils/api-services";
 
 export default {
   name: "EditSpeaker",
   components: { EditSpeakerForm },
-  props: {
-      id: {
-      type: Number,
-      required: true,
-    },
-    first_name: {
-      type: String,
-      required: true,
-    },
-    surname: {
-      type: String,
-      required: true,
-    },
-    location: {
-      type: String,
-    },
-    description: {
-      type: String,
-    },
-    path_to_picture: {
-      type: String,
-    },
+  data() {
+    return {
+      id: parseInt(this.$route.params.speaker_id),
+      speaker: null
+    };
+  },
+  async created() {
+    this.speaker = await getSpeaker(this.id);
   },
   methods: {
     async updateSpeaker(speaker) {

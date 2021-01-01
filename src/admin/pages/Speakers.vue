@@ -107,7 +107,7 @@ export default {
           }
         }
       } else if ("edit" === action) {
-        this.$router.push({name: "EditSpeaker", params: row })
+        this.$router.push({path: `/edit-speaker/${row.id}` });
       }
     },
 

@@ -85,6 +85,13 @@ export async function updateSpeaker(speaker) {
     });
 }
 
+export async function getSpeaker(speaker_id) {
+    return await safeRequest({
+        method: "get",
+        url: `${baseUrl}speakers/${speaker_id}`
+    });
+}
+
 // ===== Tags Api ============================================================= //
 
 export async function getTags(event_id) {
@@ -202,16 +209,10 @@ export async function updateSeminar(seminar) {
 }
 
 export async function getSeminar(seminar_id) {
-    const result = await safeRequest({
+    return await safeRequest({
         method: "get",
         url: `${baseUrl}seminars/${seminar_id}`
     });
-    return {
-        ...result,
-        sessions_data: result.sessions_data.map(session => session.session_id),
-        speakers_data: result.speakers_data.map(speaker => speaker.speaker_id),
-        tags_data: result.tags_data.map(tag => tag.tag_id)
-    }
 }
 // ===== Helpers ============================================================== //
 

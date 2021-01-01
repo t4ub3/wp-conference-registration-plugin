@@ -50,6 +50,14 @@ class Speakers extends WP_REST_Controller {
             '/' . $this->rest_base . '/(?P<id>\d+)',
             array(
                 array(
+                    'methods'             => \WP_REST_Server::READABLE,
+                    'callback'            => array( $this, 'get_speaker' ),
+                    'permission_callback' => array( $this, 'check_admin' ),
+                    'args' => [
+                        'id'
+                    ]
+                ),
+                array(
                     'methods'             => \WP_REST_Server::EDITABLE,
                     'callback'            => array( $this, 'update_speaker' ),
                     'permission_callback' => array( $this, 'check_admin' ),
@@ -170,6 +178,34 @@ class Speakers extends WP_REST_Controller {
 
         return rest_ensure_response( $response );
     }
+
+    /**
+     * Get a single speaker and all related data.
+     *
+     * @param WP_REST_Request $request Full details about the request.
+     *
+     * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+     */
+    public function get_speaker($request) {
+        global $wpdb;
+        $response = NULL;
+
+        if ($request["id"]) {
+            $event_query = "SELECT * FROM `{$this->prefix}speakers` WHERE id = {$request["id"]};";
+            $list = $wpdb->get_results($event_query, "ARRAY_A");
+    
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+                return rest_ensure_response( $response );
+            }
+            $response = $list[0];
+        } else {
+            $response = array("error" => "Bitte geben Sie die Speaker ID an!");
+        }
+
+        return rest_ensure_response( $response );
+    }
+
 
     /****************************************************************************************
     * API ACCESS PERMISSION CHECKS

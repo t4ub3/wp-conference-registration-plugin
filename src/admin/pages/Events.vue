@@ -104,7 +104,7 @@ export default {
           }
         }
       } else if ("edit" === action) {
-        this.$router.push({name: "EditEvent", params: row })
+        this.$router.push({path: `/${row.id}/edit-event` });
       }
     },
 

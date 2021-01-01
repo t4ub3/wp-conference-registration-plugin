@@ -5,7 +5,7 @@
       button-text="Aktualisieren"
       @seminar-submit="updateSeminar"
       :seminar-id="id"
-      :event-id="parseInt($route.params.event_id)"
+      :event-id="eventId"
     ></edit-seminar-form>
   </div>
 </template>
@@ -19,7 +19,8 @@ export default {
   components: { EditSeminarForm },
   data() {
     return {
-      id: parseInt(this.$route.params.seminar_id)
+      id: parseInt(this.$route.params.seminar_id),
+      eventId: parseInt(this.$route.params.event_id)
     };
   },
   methods: {
@@ -30,8 +31,7 @@ export default {
         alert(result.error);
       } else {
         alert(`Seminar ${seminar.name} wurde aktualisiert!`);
-        // TODO: route to edit event
-        this.$router.push("/");
+        this.$router.push({path: `/${this.eventId}/edit-event` });
       }
     },
   },

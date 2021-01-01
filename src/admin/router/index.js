@@ -19,10 +19,9 @@ export default new Router({
       component: NewEvent
     },
     {
-      path: '/edit-event',
+      path: '/:event_id/edit-event',
       name: 'EditEvent',
-      component: EditEvent,
-      props: true
+      component: EditEvent
     },
     {
       path: '/:event_id/new-seminar',
@@ -32,8 +31,7 @@ export default new Router({
     {
       path: '/:event_id/edit-seminar/:seminar_id',
       name: 'EditSeminar',
-      component: EditSeminar,
-      props: true
+      component: EditSeminar
     },
     {
       path: '/new-speaker',
@@ -41,10 +39,9 @@ export default new Router({
       component: NewSpeaker
     },
     {
-      path: '/edit-speaker',
+      path: '/edit-speaker/:speaker_id',
       name: 'EditSpeaker',
-      component: EditSpeaker,
-      props: true
+      component: EditSpeaker
     },
     {
       path: '/speakers',
