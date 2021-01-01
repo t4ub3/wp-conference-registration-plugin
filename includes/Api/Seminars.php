@@ -129,7 +129,7 @@ class Seminars extends WP_REST_Controller
 
         $parameters = $request->get_params();
         if ($parameters["name"] && $parameters["session_ids"] && $parameters["event_id"]) {
-            $result = $wpdb->insert("{$this->prefix}seminars", array(
+            $wpdb->insert("{$this->prefix}seminars", array(
                 'name' => $parameters["name"],
                 'description' => $parameters["description"],
                 'slot_max'  => $parameters["slot_max"],
@@ -137,11 +137,37 @@ class Seminars extends WP_REST_Controller
                 'event_id' => $parameters["event_id"]
             ));
 
+            
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
-            } else {
-                $response = array("success" => "Neues Seminar gespeichert!", "result" => $result);
+                return rest_ensure_response($response);
             }
+            
+            $seminar_id = $wpdb->insert_id;
+            $this->add_seminar_lookups("session", $seminar_id, $parameters["session_ids"]);
+
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+                return rest_ensure_response($response);
+            }
+
+            if ($parameters["speaker_ids"]) {
+                $this->add_seminar_lookups("speaker", $seminar_id, $parameters["speaker_ids"]);
+                if ($wpdb->last_error) {
+                    $response = array("error" => $wpdb->last_error);
+                    return rest_ensure_response($response);
+                }
+            }
+
+            if ($parameters["tag_ids"]) {
+                $this->add_seminar_lookups("tag", $seminar_id, $parameters["tag_ids"]);
+                if ($wpdb->last_error) {
+                    $response = array("error" => $wpdb->last_error);
+                    return rest_ensure_response($response);
+                }
+            }
+
+            $response = array("success" => "Neues Seminar gespeichert!");
         } else {
             $response = array("error" => "Bitte geben Sie mindestens den Namen und die zugehörigen Session und Event IDs an!");
         }
@@ -188,5 +214,23 @@ class Seminars extends WP_REST_Controller
     public function check_admin()
     {
         return current_user_can('administrator');
+    }
+
+    /****************************************************************************************
+     * HELPERS
+     ****************************************************************************************/
+    public function add_seminar_lookups($entity, $seminar_id, $entity_ids) {
+        global $wpdb;
+
+        $values = "";
+        foreach ($entity_ids as $entity_id) {
+            $values .= "($entity_id, $seminar_id),";
+        }
+        $values = substr($values, 0, -1);
+
+        $wpdb->query("INSERT INTO {$this->prefix}{$entity}s_to_seminars
+            (`{$entity}_id`, `seminar_id`)
+            VALUES
+            $values");
     }
 }

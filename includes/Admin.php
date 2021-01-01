@@ -48,6 +48,7 @@ class Admin {
      */
     public function enqueue_scripts() {
         wp_enqueue_style( 'crep-admin' );
+        wp_enqueue_style( 'crep-vendors' );
         wp_enqueue_script( 'crep-admin' );
         wp_localize_script( 'crep-admin', 'crep', array(
             'rest_url' => esc_url_raw( rest_url() ),

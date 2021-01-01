@@ -13,6 +13,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "vue": "^2.6.11",
+    "vue-multiselect": "^2.1.6",
     "vue-router": "^3.4.3",
     "vue-wp-list-table": "^1.3.0"
   },

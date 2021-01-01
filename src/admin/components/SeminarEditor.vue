@@ -2,7 +2,7 @@
   <div class="seminar-editor">
     <div>
       <h1 class="seminar-editor__headline">Seminare</h1>
-      <router-link to="/new-seminar" class="page-title-action">
+      <router-link :to="`/${event_id}/new-seminar`" class="page-title-action">
         Neues Seminar erstellen
       </router-link>
     </div>

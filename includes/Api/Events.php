@@ -59,6 +59,20 @@ class Events extends WP_REST_Controller {
                 )
             )
         );
+        register_rest_route(
+            $this->namespace,
+            '/' . $this->rest_base . '/(?P<id>\d+)',
+            array(
+                array(
+                    'methods'             => \WP_REST_Server::READABLE,
+                    'callback'            => array( $this, 'get_event' ),
+                    'permission_callback' => array( $this, 'check_admin' ),
+                    'args' => [
+                        'id'
+                    ]
+                )
+            )
+        );
     }
 
     /**
@@ -163,6 +177,61 @@ class Events extends WP_REST_Controller {
             }
         } else {
             $response = array("error" => "Bitte geben Sie mindestens die ID, den Namen, den Kontakt und die max. Teilnehmeranzahl an!");
+        }
+
+        return rest_ensure_response( $response );
+    }
+
+    /**
+     * Get a single event and all related data.
+     *
+     * @param WP_REST_Request $request Full details about the request.
+     *
+     * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+     */
+    public function get_event($request) {
+        global $wpdb;
+        $response = array();
+
+        $parameters = $request->get_params();
+        if ($request["id"]) {
+            $event_query = "SELECT * FROM `{$this->prefix}events` WHERE id = {$request["id"]};";
+            $list = $wpdb->get_results($event_query);
+    
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+                return rest_ensure_response( $response );
+            }
+            $response["event_data"] = $list[0];
+
+            $sessions_query = "SELECT * FROM `{$this->prefix}sessions` WHERE event_id = {$request["id"]};";
+            $list = $wpdb->get_results($sessions_query);
+    
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+                return rest_ensure_response( $response );
+            }
+            $response["sessions_data"] = $list;
+
+            $speakers_query = "SELECT * FROM `{$this->prefix}speakers`;";
+            $list = $wpdb->get_results($speakers_query);
+    
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+                return rest_ensure_response( $response );
+            }
+            $response["speakers_data"] = $list;
+
+            $tags_query = "SELECT * FROM `{$this->prefix}tags` WHERE event_id = {$request["id"]};";
+            $list = $wpdb->get_results($tags_query);
+    
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+                return rest_ensure_response( $response );
+            }
+            $response["tags_data"] = $list;
+        } else {
+            $response = array("error" => "Bitte geben Sie die event ID an!");
         }
 
         return rest_ensure_response( $response );

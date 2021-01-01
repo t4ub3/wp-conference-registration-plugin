@@ -110,6 +110,9 @@ class Assets {
             'crep-admin' => [
                 'src' =>  CREP_ASSETS . '/css/admin.css'
             ],
+            'crep-vendors' => [
+                'src' =>  CREP_ASSETS . '/css/vendors.css'
+            ],
         ];
 
         return $styles;

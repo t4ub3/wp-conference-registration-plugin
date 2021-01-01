@@ -41,6 +41,13 @@ export async function updateEvent(event) {
     });
 }
 
+export async function getEvent(event_id) {
+    return await safeRequest({
+        method: "get",
+        url: `${baseUrl}events/${event_id}`
+    });
+}
+
 // ===== Speakers Api ========================================================= //
 
 export async function getSpeakers() {

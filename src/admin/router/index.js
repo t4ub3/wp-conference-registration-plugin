@@ -25,12 +25,12 @@ export default new Router({
       props: true
     },
     {
-      path: '/new-seminar',
+      path: '/:event_id/new-seminar',
       name: 'NewSeminar',
       component: NewSeminar
     },
     {
-      path: '/edit-seminar',
+      path: '/:event_id/edit-seminar/:seminar_id',
       name: 'EditSeminar',
       component: EditSeminar,
       props: true
