@@ -54,11 +54,11 @@ export default {
         apply: "Übernehmen",
       },
       columns: {
-        number: {
-          label: "Nummer",
-        },
         name: {
           label: "Name",
+        },
+        number: {
+          label: "Nummer",
         },
         description: {
           label: "Beschreibung",
@@ -114,7 +114,7 @@ export default {
           }
         }
       } else if ("edit" === action) {
-        this.$router.push({name: "EditSeminar", params: row })
+        this.$router.push({path: `/${this.event_id}/edit-seminar/${row.id}` })
       }
     },
 

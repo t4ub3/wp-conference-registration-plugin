@@ -102,7 +102,7 @@
 </template>
 
 <script>
-import { getEvent } from "../utils/api-services";
+import { getSeminar, getEvent } from "../utils/api-services";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
 
@@ -114,14 +114,8 @@ export default {
       type: String,
       default: "Speichern",
     },
-    seminar: {
-      type: Object,
-      default: () => ({
-        number: null,
-        name: "",
-        description: "",
-        slot_max: null,
-      }),
+    seminarId: {
+      type: Number,
     },
     eventId: {
       type: Number,
@@ -131,10 +125,10 @@ export default {
   data() {
     return {
       newSeminar: {
-        number: this.seminar.number,
-        name: this.seminar.name,
-        description: this.seminar.description,
-        slot_max: this.seminar.slot_max,
+        number: null,
+        name: "",
+        description: "",
+        slot_max: null,
       },
       event: {
         sessions_data: [],
@@ -150,19 +144,53 @@ export default {
     };
   },
   async created() {
+    let seminar = null;
+
+    if (this.seminarId) {
+      seminar = await getSeminar(this.$route.params.seminar_id);
+      this.newSeminar.name = seminar.seminar_data.name;
+      this.newSeminar.number = seminar.seminar_data.number;
+      this.newSeminar.description = seminar.seminar_data.description;
+      this.newSeminar.slot_max = seminar.seminar_data.slot_max;
+    }
+
     this.event = await getEvent(this.eventId);
-    this.sessionsOptions = this.event.sessions_data.map((session) => ({
-      name: session.name,
-      code: session.id,
-    }));
-    this.speakersOptions = this.event.speakers_data.map((speaker) => ({
-      name: `${speaker.first_name} ${speaker.surname}`,
-      code: speaker.id,
-    }));
-    this.tagsOptions = this.event.tags_data.map((tag) => ({
-      name: tag.name,
-      code: tag.id,
-    }));
+    this.event.sessions_data.forEach((session) => {
+      this.sessionsOptions.push({
+        name: session.name,
+        code: session.id,
+      });
+      if (seminar && seminar.sessions_data.includes(session.id)) {
+        this.sessionsValue.push({
+          name: session.name,
+          code: session.id,
+        });
+      }
+    });
+    this.event.speakers_data.forEach((speaker) => {
+      this.speakersOptions.push({
+        name: `${speaker.first_name} ${speaker.surname}`,
+        code: speaker.id,
+      });
+      if (seminar && seminar.speakers_data.includes(speaker.id)) {
+        this.speakersValue.push({
+          name: `${speaker.first_name} ${speaker.surname}`,
+          code: speaker.id,
+        });
+      }
+    });
+    this.event.tags_data.forEach((tag) => {
+      this.tagsOptions.push({
+        name: tag.name,
+        code: tag.id,
+      });
+      if (seminar && seminar.tags_data.includes(tag.id)) {
+        this.tagsValue.push({
+          name: tag.name,
+          code: tag.id,
+        });
+      }
+    });
   },
   methods: {
     submit(event) {

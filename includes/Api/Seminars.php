@@ -54,6 +54,14 @@ class Seminars extends WP_REST_Controller
             '/' . $this->rest_base . '/(?P<id>\d+)',
             array(
                 array(
+                    'methods'             => \WP_REST_Server::READABLE,
+                    'callback'            => array( $this, 'get_seminar' ),
+                    'permission_callback' => array( $this, 'check_admin' ),
+                    'args' => [
+                        'id'
+                    ]
+                ),
+                array(
                     'methods'             => \WP_REST_Server::EDITABLE,
                     'callback'            => array($this, 'update_seminar'),
                     'permission_callback' => array($this, 'check_admin'),
@@ -101,12 +109,15 @@ class Seminars extends WP_REST_Controller
         if ($parameters["ids"]) {
             $ids = implode(',', array_map('intval', $parameters["ids"]));
             $count = $wpdb->query("DELETE FROM `{$this->prefix}seminars` WHERE id IN($ids)");
-            // TODO: Einträge in lookup Tabellen löschen
+
             if ($count <= 0) {
-                $response = array("error" => "Fehler beim Löschen - keine Seminars gelöscht.");
-            } else {
-                $response = array("success" => "$count Seminars gelöscht!");
+                $response = array("error" => "Fehler beim Löschen - keine Seminare gelöscht.");
+                return rest_ensure_response($response);
             }
+            
+            $this->delete_seminar_lookups($ids);
+
+            $response = array("success" => "$count Seminars gelöscht!");
         } else {
             $response = array("error" => "Es fehlen IDs, um Seminars zu löschen.");
         }
@@ -176,7 +187,7 @@ class Seminars extends WP_REST_Controller
     }
 
     /**
-     * Updates an seminar.
+     * Updates a seminar.
      *
      * @param WP_REST_Request $request Full details about the request.
      *
@@ -189,23 +200,110 @@ class Seminars extends WP_REST_Controller
 
         $parameters = $request->get_params();
         if ($parameters["name"] && $parameters["session_ids"]) {
-            $result = $wpdb->update("{$this->prefix}seminars", array(
+            $seminar_id = $request["id"];
+            $wpdb->update("{$this->prefix}seminars", array(
                 'name' => $parameters["name"],
                 'description' => $parameters["description"] ?: NULL,
                 'slot_max'  => $parameters["slot_max"] ?: NULL,
                 'number'  => $parameters["number"] ?: NULL,
-            ), array('id' => $request["id"]));
+            ), array('id' => $seminar_id));
 
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
-            } else {
-                $response = array("success" => "Aktualisiertes Seminar gespeichert!", "result" => $result);
+                return rest_ensure_response($response);
             }
+            
+            $this->delete_seminar_lookups(array($seminar_id));
+
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+                return rest_ensure_response($response);
+            }
+
+            $this->add_seminar_lookups("session", $seminar_id, $parameters["session_ids"]);
+
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+                return rest_ensure_response($response);
+            }
+
+            if ($parameters["speaker_ids"]) {
+                $this->add_seminar_lookups("speaker", $seminar_id, $parameters["speaker_ids"]);
+                if ($wpdb->last_error) {
+                    $response = array("error" => $wpdb->last_error);
+                    return rest_ensure_response($response);
+                }
+            }
+
+            if ($parameters["tag_ids"]) {
+                $this->add_seminar_lookups("tag", $seminar_id, $parameters["tag_ids"]);
+                if ($wpdb->last_error) {
+                    $response = array("error" => $wpdb->last_error);
+                    return rest_ensure_response($response);
+                }
+            }
+
+            $response = array("success" => "Aktualisiertes Seminar gespeichert!");
         } else {
             $response = array("error" => "Bitte geben Sie mindestens den Namen und die zugehörigen Session IDs an!");
         }
 
         return rest_ensure_response($response);
+    }
+
+    /**
+     * Get a single seminar and all related data.
+     *
+     * @param WP_REST_Request $request Full details about the request.
+     *
+     * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+     */
+    public function get_seminar($request) {
+        global $wpdb;
+        $response = array();
+
+        if ($request["id"]) {
+            $seminar_id = $request["id"];
+            $event_query = "SELECT * FROM `{$this->prefix}seminars` WHERE id = {$seminar_id};";
+            $list = $wpdb->get_results($event_query);
+    
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+                return rest_ensure_response( $response );
+            }
+            $response["seminar_data"] = $list[0];
+
+            $sessions_query = "SELECT session_id FROM `{$this->prefix}sessions_to_seminars` WHERE seminar_id = {$seminar_id};";
+            $list = $wpdb->get_results($sessions_query);
+    
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+                return rest_ensure_response( $response );
+            }
+            $response["sessions_data"] = $list;
+
+            $speakers_query = "SELECT speaker_id FROM `{$this->prefix}speakers_to_seminars` WHERE seminar_id = {$seminar_id};";
+            $list = $wpdb->get_results($speakers_query);
+    
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+                return rest_ensure_response( $response );
+            }
+            $response["speakers_data"] = $list;
+
+            $tags_query = "SELECT tag_id FROM `{$this->prefix}tags_to_seminars` WHERE seminar_id = {$seminar_id};";
+            $list = $wpdb->get_results($tags_query);
+    
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+                return rest_ensure_response( $response );
+            }
+            $response["tags_data"] = $list;
+        } else {
+            $response = array("error" => "Bitte geben Sie die Seminar ID an!");
+        }
+
+        return rest_ensure_response( $response );
     }
 
     /****************************************************************************************
@@ -232,5 +330,14 @@ class Seminars extends WP_REST_Controller
             (`{$entity}_id`, `seminar_id`)
             VALUES
             $values");
+    }
+
+    public function delete_seminar_lookups($seminar_ids) {
+        global $wpdb;
+
+        $seminar_ids = implode(',', array_map('intval', $seminar_ids));
+        $wpdb->query("DELETE FROM `{$this->prefix}sessions_to_seminars` WHERE seminar_id IN($seminar_ids)");
+        $wpdb->query("DELETE FROM `{$this->prefix}speakers_to_seminars` WHERE seminar_id IN($seminar_ids)");
+        $wpdb->query("DELETE FROM `{$this->prefix}tags_to_seminars` WHERE seminar_id IN($seminar_ids)");
     }
 }

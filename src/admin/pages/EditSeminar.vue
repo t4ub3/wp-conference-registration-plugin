@@ -1,10 +1,11 @@
 <template>
   <div>
-    <h1>{{ name }}</h1>
+    <h1>Seminar bearbeiten</h1>
     <edit-seminar-form
       button-text="Aktualisieren"
       @seminar-submit="updateSeminar"
-      :seminar="{ number, name, description, slot_max }"
+      :seminar-id="id"
+      :event-id="parseInt($route.params.event_id)"
     ></edit-seminar-form>
   </div>
 </template>
@@ -16,27 +17,10 @@ import { updateSeminar } from "../utils/api-services";
 export default {
   name: "EditSeminar",
   components: { EditSeminarForm },
-  props: {
-    number: {
-      type: Number,
-      required: true,
-    },
-    name: {
-      type: String,
-      required: true,
-    },
-    id: {
-      type: Number,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    slot_max: {
-      type: Number,
-      required: true,
-    },
+  data() {
+    return {
+      id: parseInt(this.$route.params.seminar_id)
+    };
   },
   methods: {
     async updateSeminar(seminar) {

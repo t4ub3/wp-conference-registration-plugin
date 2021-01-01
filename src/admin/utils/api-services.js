@@ -197,10 +197,22 @@ export async function updateSeminar(seminar) {
     return await safeRequest({
         method: "put",
         url: `${baseUrl}seminars/${seminar.id}`,
-        data: session
+        data: seminar
     });
 }
 
+export async function getSeminar(seminar_id) {
+    const result = await safeRequest({
+        method: "get",
+        url: `${baseUrl}seminars/${seminar_id}`
+    });
+    return {
+        ...result,
+        sessions_data: result.sessions_data.map(session => session.session_id),
+        speakers_data: result.speakers_data.map(speaker => speaker.speaker_id),
+        tags_data: result.tags_data.map(tag => tag.tag_id)
+    }
+}
 // ===== Helpers ============================================================== //
 
 async function safeRequest(axiosConfig) {

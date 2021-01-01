@@ -50,22 +50,16 @@ class Events extends WP_REST_Controller {
             '/' . $this->rest_base . '/(?P<id>\d+)',
             array(
                 array(
-                    'methods'             => \WP_REST_Server::EDITABLE,
-                    'callback'            => array( $this, 'update_event' ),
+                    'methods'             => \WP_REST_Server::READABLE,
+                    'callback'            => array( $this, 'get_event' ),
                     'permission_callback' => array( $this, 'check_admin' ),
                     'args' => [
                         'id'
                     ]
-                )
-            )
-        );
-        register_rest_route(
-            $this->namespace,
-            '/' . $this->rest_base . '/(?P<id>\d+)',
-            array(
+                ),
                 array(
-                    'methods'             => \WP_REST_Server::READABLE,
-                    'callback'            => array( $this, 'get_event' ),
+                    'methods'             => \WP_REST_Server::EDITABLE,
+                    'callback'            => array( $this, 'update_event' ),
                     'permission_callback' => array( $this, 'check_admin' ),
                     'args' => [
                         'id'
@@ -193,7 +187,6 @@ class Events extends WP_REST_Controller {
         global $wpdb;
         $response = array();
 
-        $parameters = $request->get_params();
         if ($request["id"]) {
             $event_query = "SELECT * FROM `{$this->prefix}events` WHERE id = {$request["id"]};";
             $list = $wpdb->get_results($event_query);
