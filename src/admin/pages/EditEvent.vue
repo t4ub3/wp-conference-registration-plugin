@@ -18,6 +18,13 @@
         <a
           href="#"
           class="nav-tab"
+          :class="[activeTab === 'registrations' ? 'nav-tab-active' : '']"
+          @click="(event) => changeTab(event, 'registrations')"
+          >Anmeldungen</a
+        >
+        <a
+          href="#"
+          class="nav-tab"
           :class="[activeTab === 'sessions' ? 'nav-tab-active' : '']"
           @click="(event) => changeTab(event, 'sessions')"
           >Sessions</a
@@ -38,6 +45,14 @@
         :event_id="id"
       >
       </seminar-editor>
+      <registration-editor
+        v-if="activeTab === 'registrations'"
+        :sessions="event.sessions"
+        :seminars="event.seminars"
+        :event_id="id"
+        @update-event-data="refresh"
+      >
+      </registration-editor>
       <session-editor
         v-if="activeTab === 'sessions'"
         :sessions-preloaded="event.sessions"
@@ -61,11 +76,12 @@ import EditEventForm from "../components/EditEventForm.vue";
 import TagEditor from "../components/TagEditor.vue";
 import SessionEditor from "../components/SessionEditor.vue";
 import SeminarEditor from "../components/SeminarEditor.vue";
+import RegistrationEditor from "../components/RegistrationEditor.vue";
 import { getEvent, updateEvent } from "../utils/api-services";
 
 export default {
   name: "EditEvent",
-  components: { EditEventForm, TagEditor, SessionEditor, SeminarEditor },
+  components: { EditEventForm, TagEditor, SessionEditor, SeminarEditor, RegistrationEditor },
   data() {
     return {
       id: parseInt(this.$route.params.event_id),

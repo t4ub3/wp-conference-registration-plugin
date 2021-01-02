@@ -38,6 +38,9 @@ class Api extends WP_REST_Controller {
         if ( !class_exists( __NAMESPACE__ . '\Api\Seminars'  ) ) {
             require_once __DIR__ . '/Api/Seminars.php';
         }
+        if ( !class_exists( __NAMESPACE__ . '\Api\Registrations'  ) ) {
+            require_once __DIR__ . '/Api/Registrations.php';
+        }
     }
 
     /**
@@ -51,6 +54,7 @@ class Api extends WP_REST_Controller {
         (new Api\Tags())->register_routes();
         (new Api\Sessions())->register_routes();
         (new Api\Seminars())->register_routes();
+        (new Api\Registrations())->register_routes();
     }
 
 }

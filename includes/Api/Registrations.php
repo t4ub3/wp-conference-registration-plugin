@@ -7,7 +7,7 @@ use WP_REST_Controller;
 /**
  * REST_API Handler
  */
-class Seminars extends WP_REST_Controller
+class Registrations extends WP_REST_Controller
 {
 
     /**
@@ -17,7 +17,7 @@ class Seminars extends WP_REST_Controller
     {
         global $wpdb;
         $this->namespace = 'crep/v1';
-        $this->rest_base = 'seminars';
+        $this->rest_base = 'registrations';
         $this->prefix = $wpdb->prefix . 'crep_';
     }
 
@@ -34,17 +34,17 @@ class Seminars extends WP_REST_Controller
             array(
                 array(
                     'methods'             => \WP_REST_Server::READABLE,
-                    'callback'            => array($this, 'get_seminars'),
+                    'callback'            => array($this, 'get_registrations'),
                     'permission_callback' => array($this, 'check_admin'),
                 ),
                 array(
                     'methods'             => \WP_REST_Server::DELETABLE,
-                    'callback'            => array($this, 'delete_seminars'),
+                    'callback'            => array($this, 'delete_registrations'),
                     'permission_callback' => array($this, 'check_admin'),
                 ),
                 array(
                     'methods'             => \WP_REST_Server::CREATABLE,
-                    'callback'            => array($this, 'create_seminar'),
+                    'callback'            => array($this, 'create_registration'),
                     'permission_callback' => array($this, 'check_admin'),
                 )
             )
@@ -55,7 +55,7 @@ class Seminars extends WP_REST_Controller
             array(
                 array(
                     'methods'             => \WP_REST_Server::READABLE,
-                    'callback'            => array($this, 'get_seminar'),
+                    'callback'            => array($this, 'get_registration'),
                     'permission_callback' => array($this, 'check_admin'),
                     'args' => [
                         'id'
@@ -63,7 +63,7 @@ class Seminars extends WP_REST_Controller
                 ),
                 array(
                     'methods'             => \WP_REST_Server::EDITABLE,
-                    'callback'            => array($this, 'update_seminar'),
+                    'callback'            => array($this, 'update_registration'),
                     'permission_callback' => array($this, 'check_admin'),
                     'args' => [
                         'id'
@@ -74,21 +74,21 @@ class Seminars extends WP_REST_Controller
     }
 
     /**
-     * Retrieves a collection of seminars.
+     * Retrieves a collection of registrations.
      *
      * @param WP_REST_Request $request Full details about the request.
      *
      * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
      */
-    public function get_seminars($request)
+    public function get_registrations($request)
     {
         global $wpdb;
         $response = [];
         if ($request["event_id"]) {
-            $query = "SELECT id FROM `{$this->prefix}seminars` WHERE event_id = {$request["event_id"]}";
-            $seminar_ids = $wpdb->get_results($query, "ARRAY_A");
-            foreach ($seminar_ids as $seminar_id) {
-                array_push($response, $this->get_seminar_with_lookups($seminar_id["id"]));
+            $query = "SELECT id FROM `{$this->prefix}registrations` WHERE event_id = {$request["event_id"]}";
+            $registration_ids = $wpdb->get_results($query, "ARRAY_A");
+            foreach ($registration_ids as $registration_id) {
+                array_push($response, $this->get_registration_with_lookups($registration_id["id"]));
             }
         } else {
             $response = array("error" => "Kein Event angegeben");
@@ -98,13 +98,13 @@ class Seminars extends WP_REST_Controller
     }
 
     /**
-     * Deletes a collection of seminars.
+     * Deletes a collection of registrations.
      *
      * @param WP_REST_Request $request Full details about the request.
      *
      * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
      */
-    public function delete_seminars($request)
+    public function delete_registrations($request)
     {
         global $wpdb;
         $response = NULL;
@@ -112,18 +112,18 @@ class Seminars extends WP_REST_Controller
         $parameters = $request->get_params();
         if ($parameters["ids"]) {
             $ids = implode(',', array_map('intval', $parameters["ids"]));
-            $count = $wpdb->query("DELETE FROM `{$this->prefix}seminars` WHERE id IN($ids)");
+            $count = $wpdb->query("DELETE FROM `{$this->prefix}registrations` WHERE id IN($ids)");
 
             if ($count <= 0) {
-                $response = array("error" => "Fehler beim Löschen - keine Seminare gelöscht.");
+                $response = array("error" => "Fehler beim Löschen - keine Anmeldungen gelöscht.");
                 return rest_ensure_response($response);
             }
 
-            $this->delete_seminar_lookups($ids);
+            $this->delete_registration_lookups($ids);
 
-            $response = array("success" => "$count Seminars gelöscht!");
+            $response = array("success" => "$count Anmeldungen gelöscht!");
         } else {
-            $response = array("error" => "Es fehlen IDs, um Seminare zu löschen.");
+            $response = array("error" => "Es fehlen IDs, um Anmeldungen zu löschen.");
         }
 
         return rest_ensure_response($response);
@@ -131,20 +131,20 @@ class Seminars extends WP_REST_Controller
 
 
     /**
-     * Creates a new seminar.
+     * Creates a new registration.
      *
      * @param WP_REST_Request $request Full details about the request.
      *
      * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
      */
-    public function create_seminar($request)
+    public function create_registration($request)
     {
         global $wpdb;
         $response = NULL;
 
         $parameters = $request->get_params();
         if ($parameters["name"] && $parameters["session_ids"] && $parameters["event_id"]) {
-            $wpdb->insert("{$this->prefix}seminars", array(
+            $wpdb->insert("{$this->prefix}registrations", array(
                 'name' => $parameters["name"],
                 'description' => $parameters["description"],
                 'slot_max'  => $parameters["slot_max"],
@@ -158,8 +158,8 @@ class Seminars extends WP_REST_Controller
                 return rest_ensure_response($response);
             }
 
-            $seminar_id = $wpdb->insert_id;
-            $this->add_seminar_lookups("session", $seminar_id, $parameters["session_ids"]);
+            $registration_id = $wpdb->insert_id;
+            $this->add_registration_lookups("session", $registration_id, $parameters["session_ids"]);
 
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
@@ -167,7 +167,7 @@ class Seminars extends WP_REST_Controller
             }
 
             if ($parameters["speaker_ids"]) {
-                $this->add_seminar_lookups("speaker", $seminar_id, $parameters["speaker_ids"]);
+                $this->add_registration_lookups("speaker", $registration_id, $parameters["speaker_ids"]);
                 if ($wpdb->last_error) {
                     $response = array("error" => $wpdb->last_error);
                     return rest_ensure_response($response);
@@ -175,14 +175,14 @@ class Seminars extends WP_REST_Controller
             }
 
             if ($parameters["tag_ids"]) {
-                $this->add_seminar_lookups("tag", $seminar_id, $parameters["tag_ids"]);
+                $this->add_registration_lookups("tag", $registration_id, $parameters["tag_ids"]);
                 if ($wpdb->last_error) {
                     $response = array("error" => $wpdb->last_error);
                     return rest_ensure_response($response);
                 }
             }
 
-            $response = array("success" => "Neues Seminar gespeichert!");
+            $response = array("success" => "Neue Anmeldung gespeichert!");
         } else {
             $response = array("error" => "Bitte geben Sie mindestens den Namen und die zugehörigen Sessions und das Event an!");
         }
@@ -191,40 +191,40 @@ class Seminars extends WP_REST_Controller
     }
 
     /**
-     * Updates a seminar.
+     * Updates a registration.
      *
      * @param WP_REST_Request $request Full details about the request.
      *
      * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
      */
-    public function update_seminar($request)
+    public function update_registration($request)
     {
         global $wpdb;
         $response = NULL;
 
         $parameters = $request->get_params();
         if ($parameters["name"] && $parameters["session_ids"]) {
-            $seminar_id = $request["id"];
-            $wpdb->update("{$this->prefix}seminars", array(
+            $registration_id = $request["id"];
+            $wpdb->update("{$this->prefix}registrations", array(
                 'name' => $parameters["name"],
                 'description' => $parameters["description"] ?: NULL,
                 'slot_max'  => $parameters["slot_max"] ?: NULL,
                 'number'  => $parameters["number"] ?: NULL,
-            ), array('id' => $seminar_id));
+            ), array('id' => $registration_id));
 
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
                 return rest_ensure_response($response);
             }
 
-            $this->delete_seminar_lookups(array($seminar_id));
+            $this->delete_registration_lookups(array($registration_id));
 
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
                 return rest_ensure_response($response);
             }
 
-            $this->add_seminar_lookups("session", $seminar_id, $parameters["session_ids"]);
+            $this->add_registration_lookups("session", $registration_id, $parameters["session_ids"]);
 
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
@@ -232,7 +232,7 @@ class Seminars extends WP_REST_Controller
             }
 
             if ($parameters["speaker_ids"]) {
-                $this->add_seminar_lookups("speaker", $seminar_id, $parameters["speaker_ids"]);
+                $this->add_registration_lookups("speaker", $registration_id, $parameters["speaker_ids"]);
                 if ($wpdb->last_error) {
                     $response = array("error" => $wpdb->last_error);
                     return rest_ensure_response($response);
@@ -240,14 +240,14 @@ class Seminars extends WP_REST_Controller
             }
 
             if ($parameters["tag_ids"]) {
-                $this->add_seminar_lookups("tag", $seminar_id, $parameters["tag_ids"]);
+                $this->add_registration_lookups("tag", $registration_id, $parameters["tag_ids"]);
                 if ($wpdb->last_error) {
                     $response = array("error" => $wpdb->last_error);
                     return rest_ensure_response($response);
                 }
             }
 
-            $response = array("success" => "Aktualisiertes Seminar gespeichert!");
+            $response = array("success" => "Aktualisierte Anmeldung gespeichert!");
         } else {
             $response = array("error" => "Bitte geben Sie mindestens den Namen und die zugehörigen Sessions an!");
         }
@@ -256,21 +256,21 @@ class Seminars extends WP_REST_Controller
     }
 
     /**
-     * Get a single seminar and all related data.
+     * Get a single registration and all related data.
      *
      * @param WP_REST_Request $request Full details about the request.
      *
      * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
      */
-    public function get_seminar($request)
+    public function get_registration($request)
     {
         global $wpdb;
         $response = NULL;
 
         if ($request["id"]) {
-            $response = $this->get_seminar_with_lookups($request["id"]);
+            $response = $this->get_registration_with_lookups($request["id"]);
         } else {
-            $response = array("error" => "Bitte geben Sie die Seminar ID an!");
+            $response = array("error" => "Bitte geben Sie die Anmeldung an!");
         }
 
         return rest_ensure_response($response);
@@ -287,38 +287,38 @@ class Seminars extends WP_REST_Controller
     /****************************************************************************************
      * HELPERS
      ****************************************************************************************/
-    public function add_seminar_lookups($entity, $seminar_id, $entity_ids)
+    public function add_registration_lookups($entity, $registration_id, $entity_ids)
     {
         global $wpdb;
 
         $values = "";
         foreach ($entity_ids as $entity_id) {
-            $values .= "($entity_id, $seminar_id),";
+            $values .= "($entity_id, $registration_id),";
         }
         $values = substr($values, 0, -1);
 
-        $wpdb->query("INSERT INTO {$this->prefix}{$entity}s_to_seminars
-            (`{$entity}_id`, `seminar_id`)
+        $wpdb->query("INSERT INTO {$this->prefix}{$entity}s_to_registrations
+            (`{$entity}_id`, `registration_id`)
             VALUES
             $values");
     }
 
-    public function delete_seminar_lookups($seminar_ids)
+    public function delete_registration_lookups($registration_ids)
     {
         global $wpdb;
 
-        $seminar_ids = implode(',', array_map('intval', $seminar_ids));
-        $wpdb->query("DELETE FROM `{$this->prefix}sessions_to_seminars` WHERE seminar_id IN($seminar_ids)");
-        $wpdb->query("DELETE FROM `{$this->prefix}speakers_to_seminars` WHERE seminar_id IN($seminar_ids)");
-        $wpdb->query("DELETE FROM `{$this->prefix}tags_to_seminars` WHERE seminar_id IN($seminar_ids)");
+        $registration_ids = implode(',', array_map('intval', $registration_ids));
+        $wpdb->query("DELETE FROM `{$this->prefix}sessions_to_registrations` WHERE registration_id IN($registration_ids)");
+        $wpdb->query("DELETE FROM `{$this->prefix}speakers_to_registrations` WHERE registration_id IN($registration_ids)");
+        $wpdb->query("DELETE FROM `{$this->prefix}tags_to_registrations` WHERE registration_id IN($registration_ids)");
     }
 
-    public function get_seminar_with_lookups($seminar_id)
+    public function get_registration_with_lookups($registration_id)
     {
         global $wpdb;
         $response = NULL;
 
-        $event_query = "SELECT * FROM `{$this->prefix}seminars` WHERE id = {$seminar_id};";
+        $event_query = "SELECT * FROM `{$this->prefix}registrations` WHERE id = {$registration_id};";
         $list = $wpdb->get_results($event_query, "ARRAY_A");
 
         if ($wpdb->last_error) {
@@ -327,43 +327,28 @@ class Seminars extends WP_REST_Controller
         }
         $response = $list[0];
 
-        $sessions_query = "SELECT session_id FROM `{$this->prefix}sessions_to_seminars` WHERE seminar_id = {$seminar_id};";
-        $list = $wpdb->get_results($sessions_query, "ARRAY_A");
+        $registration_seminars_query = "SELECT session_to_seminar_id FROM `{$this->prefix}registrations_to_seminar_in_session` WHERE registration_id = {$registration_id};";
+        $registration_seminars_ids = $wpdb->get_results($registration_seminars_query, "ARRAY_A");
 
         if ($wpdb->last_error) {
             $response = array("error" => $wpdb->last_error);
             return $response;
         }
 
-        $response["session_ids"] = array();
-        foreach ($list as $session_row) {
-            array_push($response["session_ids"], $session_row["session_id"]);
-        }
+        $response["seminars"] = array();
 
-        $speakers_query = "SELECT speaker_id FROM `{$this->prefix}speakers_to_seminars` WHERE seminar_id = {$seminar_id};";
-        $list = $wpdb->get_results($speakers_query, "ARRAY_A");
+        foreach ($registration_seminars_ids as $registration_seminars_id) {
+            $session_to_seminar_id = $registration_seminars_id["session_to_seminar_id"];
+            $seminar_sessions_query = "SELECT session_id, seminar_id FROM `{$this->prefix}sessions_to_seminars` WHERE id = {$session_to_seminar_id};";
+            $list_session_to_seminar_ids = $wpdb->get_results($seminar_sessions_query, "ARRAY_A");
+            array_push($response["seminars"], $list_session_to_seminar_ids[0]);
+        }
 
         if ($wpdb->last_error) {
             $response = array("error" => $wpdb->last_error);
             return $response;
         }
-        $response["speaker_ids"] = array();
-        foreach ($list as $speaker_row) {
-            array_push($response["speaker_ids"], $speaker_row["speaker_id"]);
-        }
-
-        $tags_query = "SELECT tag_id FROM `{$this->prefix}tags_to_seminars` WHERE seminar_id = {$seminar_id};";
-        $list = $wpdb->get_results($tags_query, "ARRAY_A");
-
-        if ($wpdb->last_error) {
-            $response = array("error" => $wpdb->last_error);
-            return $response;
-        }
-        $response["tag_ids"] = array();
-        foreach ($list as $tag_row) {
-            array_push($response["tag_ids"], $tag_row["tag_id"]);
-        }
-
+        
         return $response;
     }
 }

@@ -196,7 +196,7 @@ class Events extends WP_REST_Controller {
                 return rest_ensure_response( $response );
             }
             $response = $list[0];
-
+            
             $sessions_query = "SELECT * FROM `{$this->prefix}sessions` WHERE event_id = {$request["id"]};";
             $list = $wpdb->get_results($sessions_query, "ARRAY_A");
     
@@ -234,6 +234,17 @@ class Events extends WP_REST_Controller {
             }
 
             $response["tags"] = $list;
+
+            $seminars_query = "SELECT * FROM `{$this->prefix}seminars` WHERE event_id = {$request["id"]};";
+            $list = $wpdb->get_results($seminars_query, "ARRAY_A");
+    
+            if ($wpdb->last_error) {
+                $response = array("error" => $wpdb->last_error);
+                return rest_ensure_response( $response );
+            }
+
+            $response["seminars"] = $list;
+
         } else {
             $response = array("error" => "Bitte geben Sie die Event ID an!");
         }

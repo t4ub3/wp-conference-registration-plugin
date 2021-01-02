@@ -170,6 +170,49 @@ export async function updateSession(session) {
 
 // ===== Registrations Api ==================================================== //
 
+export async function getRegistrations(event_id) {
+    const untypedResult = await safeRequest({
+        method: "get",
+        url: `${baseUrl}registrations`,
+        params: {event_id: event_id}
+    });
+
+    return untypedResult.map(registration => ({
+        ...registration, id: parseInt(registration.id), event_id: parseInt(registration.event_id)
+    }))
+}
+
+export async function deleteRegistrations(ids) {
+    return await safeRequest({
+        method: "delete",
+        url: `${baseUrl}registrations`,
+        data: {ids: ids}
+    });
+}
+
+export async function createRegistration(registration) {
+    return await safeRequest({
+        method: "post",
+        url: `${baseUrl}registrations`,
+        data: registration
+    });
+}
+
+export async function updateRegistration(registration) {
+    return await safeRequest({
+        method: "put",
+        url: `${baseUrl}registrations/${registration.id}`,
+        data: registration
+    });
+}
+
+export async function getRegistration(registration_id) {
+    return await safeRequest({
+        method: "get",
+        url: `${baseUrl}registrations/${registration_id}`
+    });
+}
+
 // ===== Seminars Api ========================================================= //
 
 export async function getSeminars(event_id) {
