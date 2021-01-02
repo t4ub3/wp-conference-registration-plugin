@@ -2,9 +2,10 @@
   <div class="seminar-editor">
     <div>
       <h1 class="seminar-editor__headline">Seminare</h1>
-      <router-link :to="`/${event_id}/new-seminar`" class="page-title-action">
+      <router-link v-if="sessions.length" :to="`/${event_id}/new-seminar`" class="page-title-action">
         Neues Seminar erstellen
       </router-link>
+      <em v-else>&nbsp; (Sie müssen zuerst Sessions anlegen, um Seminare erstellen zu können)</em>
     </div>
     <list-table
       :rows="seminars"
@@ -19,21 +20,21 @@
       @bulk:click="onBulkActionClick"
     >
       <template slot="speakers" slot-scope="data">
-        <ul>
+        <ul class="seminar-editor__list">
           <li v-for="speaker in data.row.speakers" :key="speaker">
             {{ speaker }}
           </li>
         </ul>
       </template>
       <template slot="sessions" slot-scope="data">
-        <ul>
+        <ul class="seminar-editor__list">
           <li v-for="session in data.row.sessions" :key="session">
             {{ session }}
           </li>
         </ul>
       </template>
       <template slot="tags" slot-scope="data">
-        <ul>
+        <ul class="seminar-editor__list">
           <li
             class="seminar-editor__tag"
             v-for="tag in data.row.tags"
@@ -197,9 +198,6 @@ export default {
 </script>
 
 <style scoped>
-.seminar-editor {
-  padding-top: 30px;
-}
 .seminar-editor__headline {
   display: inline-block;
 }
@@ -217,5 +215,8 @@ export default {
   overflow: hidden;
   max-width: 100%;
   text-overflow: ellipsis;
+}
+.seminar-editor__list {
+  margin: 0;
 }
 </style>

@@ -195,9 +195,6 @@ export default {
 </script>
 
 <style scoped>
-.session-editor {
-  padding-top: 30px;
-}
 .session-editor__update-form {
   display: flex;
 }

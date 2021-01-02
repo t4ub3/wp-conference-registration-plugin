@@ -7,7 +7,7 @@
         @event-submit="updateEvent"
         :event="event"
       ></edit-event-form>
-      <nav class="nav-tab-wrapper wp-clearfix">
+      <nav class="nav-tab-wrapper wp-clearfix edit-event__nav">
         <a
           href="#"
           class="nav-tab"
@@ -101,5 +101,8 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+.edit-event__nav {
+  margin: 30px 0 20px;
+}
 </style>

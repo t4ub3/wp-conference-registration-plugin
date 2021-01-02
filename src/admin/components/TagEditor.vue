@@ -188,9 +188,6 @@ export default {
 </script>
 
 <style scoped>
-.tag-editor {
-  padding-top: 30px;
-}
 .tag-editor__update-form {
   display: flex;
 }
