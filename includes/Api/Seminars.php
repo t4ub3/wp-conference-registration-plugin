@@ -35,7 +35,7 @@ class Seminars extends WP_REST_Controller
                 array(
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => array($this, 'get_seminars'),
-                    'permission_callback' => array($this, 'check_admin'),
+                    'permission_callback' => array($this, 'check_frontend'),
                 ),
                 array(
                     'methods'             => \WP_REST_Server::DELETABLE,
@@ -285,6 +285,10 @@ class Seminars extends WP_REST_Controller
         return current_user_can('administrator');
     }
 
+    public function check_frontend()
+    {
+        return true;
+    }
     /****************************************************************************************
      * HELPERS
      ****************************************************************************************/

@@ -1,12 +1,18 @@
 import Vue from 'vue'
-import App from './App.vue'
-import router from './router'
+import SeminarList from './SeminarList.vue'
 
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
-new Vue({
-  el: '#vue-frontend-app',
-  router,
-  render: h => h(App)
-})
+const mountElementSeminarList = document.getElementById("crep-seminar-list")
+if (mountElementSeminarList) {
+  new Vue({
+    el: '#crep-seminar-list',
+    render: h => h(SeminarList, {
+      props: {
+        eventId: parseInt(mountElementSeminarList.dataset.eventId)
+      }
+    })
+  });
+}
+
