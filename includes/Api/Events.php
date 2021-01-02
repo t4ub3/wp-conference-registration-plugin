@@ -208,6 +208,11 @@ class Events extends WP_REST_Controller {
                 $query = "SELECT * FROM `{$this->prefix}sessions_to_seminars` WHERE session_id = {$session["id"]}";
                 $seminars = $wpdb->get_results($query, "ARRAY_A");
                 $session["count"] = count($seminars);
+                $session["seminar_ids"] = array();
+
+                foreach ($seminars as $seminar) {
+                    array_push($session["seminar_ids"], $seminar["seminar_id"]);
+                }
             }
             $response["sessions"] = $list;
 

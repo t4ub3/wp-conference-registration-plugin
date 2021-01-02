@@ -49,7 +49,7 @@ function crep_setup_tables() {
     create_crep_table("registrations", "
         first_name varchar(50) NOT NULL,
         surname varchar(50) NOT NULL,
-        contact_mail text NOT NULL, 
+        contact_mail text, 
         confirmed BOOLEAN NOT NULL DEFAULT 0,
         registration_date timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL, 
         additional_params text,

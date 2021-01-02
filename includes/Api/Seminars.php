@@ -217,7 +217,8 @@ class Seminars extends WP_REST_Controller
                 return rest_ensure_response($response);
             }
 
-            $this->delete_seminar_lookups(array($seminar_id));
+            $seminar_ids = implode(',', array_map('intval', array($seminar_id)));
+            $this->delete_seminar_lookups($seminar_ids);
 
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
@@ -307,7 +308,6 @@ class Seminars extends WP_REST_Controller
     {
         global $wpdb;
 
-        $seminar_ids = implode(',', array_map('intval', $seminar_ids));
         $wpdb->query("DELETE FROM `{$this->prefix}sessions_to_seminars` WHERE seminar_id IN($seminar_ids)");
         $wpdb->query("DELETE FROM `{$this->prefix}speakers_to_seminars` WHERE seminar_id IN($seminar_ids)");
         $wpdb->query("DELETE FROM `{$this->prefix}tags_to_seminars` WHERE seminar_id IN($seminar_ids)");

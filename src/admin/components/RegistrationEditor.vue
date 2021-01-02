@@ -129,13 +129,13 @@ export default {
 
     async onActionClick(action, row) {
       if ("delete" === action) {
-        if (confirm("Registration " + row.name + " wirklich löschen?")) {
+        if (confirm(`Anmeldung für ${row.first_name} ${row.surname} wirklich löschen?`)) {
           const result = await deleteRegistrations([row.id]);
           if (result.error) {
             alert(result.error);
           } else {
             this.loadRegistrations();
-            alert(row.name + " gelöscht!");
+            alert(`Anmeldung für ${row.first_name} ${row.surname} gelöscht!`);
           }
         }
       } else if ("edit" === action) {
@@ -145,7 +145,7 @@ export default {
 
     async onBulkActionClick(action, rowIds) {
       if ("delete" === action) {
-        if (confirm("Gewählte Registratione wirklich löschen?")) {
+        if (confirm("Gewählte Anmeldungen wirklich löschen?")) {
           const result = await deleteRegistrations(rowIds);
           if (result.error) {
             alert(result.error);

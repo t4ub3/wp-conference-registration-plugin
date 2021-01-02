@@ -5,7 +5,7 @@
         <th scope="row">Nummer</th>
         <td>
           <input
-            id="crep-contact"
+            id="crep-number"
             v-model="newSeminar.number"
             type="number"
             class="edit-seminar-form__number-field"
@@ -25,7 +25,7 @@
       <tr class="form-field">
         <th scope="row">Beschreibung</th>
         <td>
-          <textarea id="crep-contact" v-model="newSeminar.description" />
+          <textarea id="crep-description" v-model="newSeminar.description" />
         </td>
       </tr>
       <tr class="form-field">
@@ -131,9 +131,9 @@ export default {
         slot_max: null,
       },
       event: {
-        sessions_data: [],
-        tags_data: [],
-        speakers_data: [],
+        sessions: [],
+        tags: [],
+        speakers: [],
       },
       sessionsValue: [],
       sessionsOptions: [],

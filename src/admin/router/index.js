@@ -5,6 +5,8 @@ import NewEvent from 'admin/pages/NewEvent.vue'
 import EditEvent from 'admin/pages/EditEvent.vue'
 import NewSeminar from 'admin/pages/NewSeminar.vue'
 import EditSeminar from 'admin/pages/EditSeminar.vue'
+import NewRegistration from 'admin/pages/NewRegistration.vue'
+import EditRegistration from 'admin/pages/EditRegistration.vue'
 import Speakers from 'admin/pages/Speakers.vue'
 import NewSpeaker from 'admin/pages/NewSpeaker.vue'
 import EditSpeaker from 'admin/pages/EditSpeaker.vue'
@@ -32,6 +34,16 @@ export default new Router({
       path: '/:event_id/edit-seminar/:seminar_id',
       name: 'EditSeminar',
       component: EditSeminar
+    },
+    {
+      path: '/:event_id/new-registration',
+      name: 'NewRegistration',
+      component: NewRegistration
+    },
+    {
+      path: '/:event_id/edit-registration/:registration_id',
+      name: 'EditRegistration',
+      component: EditRegistration
     },
     {
       path: '/new-speaker',

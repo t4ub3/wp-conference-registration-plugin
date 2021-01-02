@@ -143,12 +143,12 @@ class Registrations extends WP_REST_Controller
         $response = NULL;
 
         $parameters = $request->get_params();
-        if ($parameters["name"] && $parameters["session_ids"] && $parameters["event_id"]) {
+        if ($parameters["first_name"] && $parameters["surname"] && $parameters["event_id"]) {
             $wpdb->insert("{$this->prefix}registrations", array(
-                'name' => $parameters["name"],
-                'description' => $parameters["description"],
-                'slot_max'  => $parameters["slot_max"],
-                'number'  => $parameters["number"],
+                'first_name' => $parameters["first_name"],
+                'surname' => $parameters["surname"],
+                'contact_mail'  => $parameters["contact_mail"] ?: NULL,
+                'confirmed'  => $parameters["confirmed"] ?: 0,
                 'event_id' => $parameters["event_id"]
             ));
 
@@ -159,23 +159,9 @@ class Registrations extends WP_REST_Controller
             }
 
             $registration_id = $wpdb->insert_id;
-            $this->add_registration_lookups("session", $registration_id, $parameters["session_ids"]);
+            if ($parameters["seminars"]) {
+                $this->add_registration_lookups($registration_id, $parameters["seminars"]);
 
-            if ($wpdb->last_error) {
-                $response = array("error" => $wpdb->last_error);
-                return rest_ensure_response($response);
-            }
-
-            if ($parameters["speaker_ids"]) {
-                $this->add_registration_lookups("speaker", $registration_id, $parameters["speaker_ids"]);
-                if ($wpdb->last_error) {
-                    $response = array("error" => $wpdb->last_error);
-                    return rest_ensure_response($response);
-                }
-            }
-
-            if ($parameters["tag_ids"]) {
-                $this->add_registration_lookups("tag", $registration_id, $parameters["tag_ids"]);
                 if ($wpdb->last_error) {
                     $response = array("error" => $wpdb->last_error);
                     return rest_ensure_response($response);
@@ -184,7 +170,7 @@ class Registrations extends WP_REST_Controller
 
             $response = array("success" => "Neue Anmeldung gespeichert!");
         } else {
-            $response = array("error" => "Bitte geben Sie mindestens den Namen und die zugehörigen Sessions und das Event an!");
+            $response = array("error" => "Bitte geben Sie mindestens den Namen, Vornamen und das Event an!");
         }
 
         return rest_ensure_response($response);
@@ -203,13 +189,13 @@ class Registrations extends WP_REST_Controller
         $response = NULL;
 
         $parameters = $request->get_params();
-        if ($parameters["name"] && $parameters["session_ids"]) {
+        if ($parameters["first_name"] && $parameters["surname"]) {
             $registration_id = $request["id"];
             $wpdb->update("{$this->prefix}registrations", array(
-                'name' => $parameters["name"],
-                'description' => $parameters["description"] ?: NULL,
-                'slot_max'  => $parameters["slot_max"] ?: NULL,
-                'number'  => $parameters["number"] ?: NULL,
+                'first_name' => $parameters["first_name"],
+                'surname' => $parameters["surname"],
+                'contact_mail'  => $parameters["contact_mail"] ?: NULL,
+                'confirmed'  => $parameters["confirmed"] ?: 1,
             ), array('id' => $registration_id));
 
             if ($wpdb->last_error) {
@@ -217,30 +203,16 @@ class Registrations extends WP_REST_Controller
                 return rest_ensure_response($response);
             }
 
-            $this->delete_registration_lookups(array($registration_id));
+            $registration_ids = implode(',', array_map('intval', array($registration_id)));
+            $this->delete_registration_lookups($registration_ids);
 
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
                 return rest_ensure_response($response);
             }
 
-            $this->add_registration_lookups("session", $registration_id, $parameters["session_ids"]);
-
-            if ($wpdb->last_error) {
-                $response = array("error" => $wpdb->last_error);
-                return rest_ensure_response($response);
-            }
-
-            if ($parameters["speaker_ids"]) {
-                $this->add_registration_lookups("speaker", $registration_id, $parameters["speaker_ids"]);
-                if ($wpdb->last_error) {
-                    $response = array("error" => $wpdb->last_error);
-                    return rest_ensure_response($response);
-                }
-            }
-
-            if ($parameters["tag_ids"]) {
-                $this->add_registration_lookups("tag", $registration_id, $parameters["tag_ids"]);
+            if ($parameters["seminars"]) {
+                $this->add_registration_lookups($registration_id, $parameters["seminars"]);
                 if ($wpdb->last_error) {
                     $response = array("error" => $wpdb->last_error);
                     return rest_ensure_response($response);
@@ -249,7 +221,7 @@ class Registrations extends WP_REST_Controller
 
             $response = array("success" => "Aktualisierte Anmeldung gespeichert!");
         } else {
-            $response = array("error" => "Bitte geben Sie mindestens den Namen und die zugehörigen Sessions an!");
+            $response = array("error" => "Bitte geben Sie mindestens den Namen und den Vornamen an!");
         }
 
         return rest_ensure_response($response);
@@ -287,18 +259,21 @@ class Registrations extends WP_REST_Controller
     /****************************************************************************************
      * HELPERS
      ****************************************************************************************/
-    public function add_registration_lookups($entity, $registration_id, $entity_ids)
+    public function add_registration_lookups($registration_id, $seminars)
     {
         global $wpdb;
 
         $values = "";
-        foreach ($entity_ids as $entity_id) {
-            $values .= "($entity_id, $registration_id),";
+        foreach ($seminars as $seminar) {
+            $query = "SELECT id FROM `{$this->prefix}sessions_to_seminars` WHERE session_id = {$seminar["session_id"]} AND seminar_id = {$seminar["seminar_id"]}";
+            $session_to_seminar_id = $wpdb->get_results($query, "ARRAY_A")[0];
+
+            $values .= "($registration_id, {$session_to_seminar_id['id']}),";
         }
         $values = substr($values, 0, -1);
 
-        $wpdb->query("INSERT INTO {$this->prefix}{$entity}s_to_registrations
-            (`{$entity}_id`, `registration_id`)
+        $wpdb->query("INSERT INTO {$this->prefix}registrations_to_seminar_in_session
+            (`registration_id`, `session_to_seminar_id`)
             VALUES
             $values");
     }
@@ -306,11 +281,7 @@ class Registrations extends WP_REST_Controller
     public function delete_registration_lookups($registration_ids)
     {
         global $wpdb;
-
-        $registration_ids = implode(',', array_map('intval', $registration_ids));
-        $wpdb->query("DELETE FROM `{$this->prefix}sessions_to_registrations` WHERE registration_id IN($registration_ids)");
-        $wpdb->query("DELETE FROM `{$this->prefix}speakers_to_registrations` WHERE registration_id IN($registration_ids)");
-        $wpdb->query("DELETE FROM `{$this->prefix}tags_to_registrations` WHERE registration_id IN($registration_ids)");
+        $wpdb->query("DELETE FROM `{$this->prefix}registrations_to_seminar_in_session` WHERE registration_id IN($registration_ids)");
     }
 
     public function get_registration_with_lookups($registration_id)
@@ -348,7 +319,7 @@ class Registrations extends WP_REST_Controller
             $response = array("error" => $wpdb->last_error);
             return $response;
         }
-        
+
         return $response;
     }
 }
