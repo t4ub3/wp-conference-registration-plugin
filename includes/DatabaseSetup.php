@@ -21,7 +21,7 @@ function create_crep_table($name, $columns) {
 
 function crep_setup_tables() {
     create_crep_table("events", "
-        name varchar(50) NOT NULL, 
+        name varchar(500) NOT NULL, 
         default_slot_max smallint(4), 
         created timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL, 
         contact_mail text NOT NULL, 
@@ -29,12 +29,12 @@ function crep_setup_tables() {
     ");
 
     create_crep_table("sessions", "
-        name varchar(50) NOT NULL,
+        name varchar(500) NOT NULL,
         event_id int(9) NOT NULL,
     ");
 
     create_crep_table("seminars", "
-        name varchar(50) NOT NULL, 
+        name varchar(500) NOT NULL, 
         description text, 
         slot_max smallint(4), 
         number smallint(4),
@@ -42,13 +42,13 @@ function crep_setup_tables() {
     ");
     
     create_crep_table("tags", "
-        name varchar(50) NOT NULL,
+        name varchar(500) NOT NULL,
         event_id int(9) NOT NULL,
     ");
 
     create_crep_table("registrations", "
-        first_name varchar(50) NOT NULL,
-        surname varchar(50) NOT NULL,
+        first_name varchar(500) NOT NULL,
+        surname varchar(500) NOT NULL,
         contact_mail text, 
         confirmed BOOLEAN NOT NULL DEFAULT 0,
         registration_date timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL, 
@@ -57,11 +57,11 @@ function crep_setup_tables() {
     ");
 
     create_crep_table("speakers", "
-        first_name varchar(50) NOT NULL,
-        surname varchar(50) NOT NULL,
+        first_name varchar(500) NOT NULL,
+        surname varchar(500) NOT NULL,
         description text, 
         path_to_picture varchar(500),
-        location varchar(50),
+        location varchar(500),
     ");
 
     create_crep_table("sessions_to_seminars", "
