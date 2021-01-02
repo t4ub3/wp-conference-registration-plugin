@@ -1,13 +1,13 @@
 <template>
   <div id="crep-seminar-list">
-    <div v-for="seminar in seminars" :key="seminar.id">
-      <div v-if="seminar.number">{{ seminar.number }}</div>
-      <div>
-        <h2>{{ seminar.name }}</h2>
-        <p>{{ seminar.description }}</p>
-        <small>{{ getSpeakers(seminar.speaker_ids) }}</small>
-        <ul v-if="seminar.tag_ids.length">
-          <li v-for="tagId in seminar.tag_ids" :key="tagId">
+    <div class="crep-seminar" v-for="seminar in seminars" :key="seminar.id">
+      <div v-if="seminar.number" class="crep-seminar__number">{{ seminar.number }}</div>
+      <div class="crep-seminar__content">
+        <h2 class="crep-seminar__name">{{ seminar.name }}</h2>
+        <p class="crep-seminar__description">{{ seminar.description }}</p>
+        <small class="crep-seminar__speakers">{{ getSpeakers(seminar.speaker_ids) }}</small>
+        <ul v-if="seminar.tag_ids.length" class="crep-seminar__tags">
+          <li v-for="tagId in seminar.tag_ids" :key="tagId" class="crep-seminar__tag">
             {{ tag_map[tagId] }}
           </li>
         </ul>
@@ -58,5 +58,35 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+.crep-seminar {
+  display: flex;
+}
+.crep-seminar__number {
+  background-color: #A21B2A;
+  color: white;
+  padding: 4px;
+}
+.crep-seminar__content {
+
+}
+.crep-seminar__name {
+  color: #A21B2A;
+}
+.crep-seminar__description {
+  color: #022232;
+}
+.crep-seminar__speakers {
+  color: #6bac2e;
+  font-weight: bold;
+}
+.crep-seminar__tags {
+  
+}
+.crep-seminar__tag {
+  background-color: #022232;
+  color: white;
+  padding: 4px;
+  border-radius: 5px;  
+}
 </style>
