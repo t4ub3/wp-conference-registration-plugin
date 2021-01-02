@@ -34,9 +34,15 @@
           >
             <template slot="name" slot-scope="data">
               <div v-if="!data.row.editing">{{ data.row.name }}</div>
-              <form class="tag-editor__update-form" v-else @submit="(event) => submitUpdate(event, data.row)">
+              <form
+                class="tag-editor__update-form"
+                v-else
+                @submit="(event) => submitUpdate(event, data.row)"
+              >
                 <input type="text" v-model="data.row.name" />
-                <button class="button button-primary" type="submit">Speichern</button>
+                <button class="button button-primary" type="submit">
+                  Speichern
+                </button>
               </form>
             </template>
           </list-table>
@@ -62,7 +68,7 @@ export default {
   props: {
     tagsPreloaded: {
       type: Array,
-      default: () => ([])
+      default: () => [],
     },
     event_id: {
       type: Number,
@@ -88,7 +94,7 @@ export default {
           label: "Name",
         },
         count: {
-          label: "Anzahl",
+          label: "Anzahl Seminare",
         },
       },
       actions: [
@@ -123,6 +129,7 @@ export default {
       }
       this.tags = result.map((tag) => ({ ...tag, editing: false }));
       this.per_page = this.tags.length;
+      this.$emit("update-event-data");
     },
 
     async submit(event) {
@@ -185,6 +192,6 @@ export default {
   padding-top: 30px;
 }
 .tag-editor__update-form {
-    display: flex;
+  display: flex;
 }
 </style>

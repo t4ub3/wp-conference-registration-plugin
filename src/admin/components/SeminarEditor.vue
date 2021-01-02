@@ -18,6 +18,31 @@
       @action:click="onActionClick"
       @bulk:click="onBulkActionClick"
     >
+      <template slot="speakers" slot-scope="data">
+        <ul>
+          <li v-for="speaker in data.row.speakers" :key="speaker">
+            {{ speaker }}
+          </li>
+        </ul>
+      </template>
+      <template slot="sessions" slot-scope="data">
+        <ul>
+          <li v-for="session in data.row.sessions" :key="session">
+            {{ session }}
+          </li>
+        </ul>
+      </template>
+      <template slot="tags" slot-scope="data">
+        <ul>
+          <li
+            class="seminar-editor__tag"
+            v-for="tag in data.row.tags"
+            :key="tag"
+          >
+            {{ tag }}
+          </li>
+        </ul>
+      </template>
     </list-table>
   </div>
 </template>
@@ -26,6 +51,7 @@
 import {
   deleteSeminars,
   getSeminars,
+  getSpeakers,
 } from "../utils/api-services";
 import ListTable from "vue-wp-list-table";
 import "vue-wp-list-table/dist/vue-wp-list-table.css";
@@ -38,6 +64,18 @@ export default {
       type: Number,
       required: true,
     },
+    tags: {
+      type: Array,
+      default: () => [],
+    },
+    sessions: {
+      type: Array,
+      default: () => [],
+    },
+    speakers: {
+      type: Array,
+      default: () => [],
+    },
   },
   data() {
     return {
@@ -46,6 +84,9 @@ export default {
         event_id: this.event_id,
       },
       seminars: [],
+      tag_map: {},
+      session_map: {},
+      speaker_map: {},
       per_page: 50,
       text: {
         select_bulk_action: "Mehrfachaktionen auswählen",
@@ -63,11 +104,17 @@ export default {
         description: {
           label: "Beschreibung",
         },
-        slot_max: {
-          label: "max. Teilnehmerzahl",
+        speakers: {
+          label: "Referenten",
         },
         sessions: {
           label: "Sessions",
+        },
+        slot_max: {
+          label: "max. Teilnehmerzahl",
+        },
+        tags: {
+          label: "Schlagwörter",
         },
       },
       actions: [
@@ -89,6 +136,15 @@ export default {
     };
   },
   created() {
+    this.speakers.forEach((speaker) => {
+      this.speaker_map[speaker.id] = `${speaker.first_name} ${speaker.surname}`;
+    });
+    this.tags.forEach((tag) => {
+      this.tag_map[tag.id] = tag.name;
+    });
+    this.sessions.forEach((session) => {
+      this.session_map[session.id] = session.name;
+    });
     this.loadSeminars();
   },
   methods: {
@@ -98,7 +154,12 @@ export default {
         alert(result.error);
         return;
       }
-      this.seminars = result;
+      this.seminars = result.map((seminar) => ({
+        ...seminar,
+        sessions: seminar.session_ids.map((id) => this.session_map[id]),
+        tags: seminar.tag_ids.map((id) => this.tag_map[id]),
+        speakers: seminar.speaker_ids.map((id) => this.speaker_map[id]),
+      }));
       this.per_page = this.seminars.length;
     },
 
@@ -114,7 +175,7 @@ export default {
           }
         }
       } else if ("edit" === action) {
-        this.$router.push({path: `/${this.event_id}/edit-seminar/${row.id}` });
+        this.$router.push({ path: `/${this.event_id}/edit-seminar/${row.id}` });
       }
     },
 
@@ -141,5 +202,20 @@ export default {
 }
 .seminar-editor__headline {
   display: inline-block;
+}
+.seminar-editor__tag {
+  position: relative;
+  display: inline-block;
+  padding: 4px;
+  border-radius: 5px;
+  margin-right: 6px;
+  color: #fff;
+  line-height: 1;
+  background: #32373c;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
 }
 </style>

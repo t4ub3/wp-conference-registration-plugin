@@ -7,9 +7,51 @@
         @event-submit="updateEvent"
         :event="event"
       ></edit-event-form>
-      <session-editor :sessions-preloaded="event.sessions" :event_id="id"> </session-editor>
-      <seminar-editor :event_id="id"> </seminar-editor>
-      <tag-editor :tags-preloaded="event.tags"  :event_id="id"> </tag-editor>
+      <nav class="nav-tab-wrapper wp-clearfix">
+        <a
+          href="#"
+          class="nav-tab"
+          :class="[activeTab === 'seminars' ? 'nav-tab-active' : '']"
+          @click="(event) => changeTab(event, 'seminars')"
+          >Seminare</a
+        >
+        <a
+          href="#"
+          class="nav-tab"
+          :class="[activeTab === 'sessions' ? 'nav-tab-active' : '']"
+          @click="(event) => changeTab(event, 'sessions')"
+          >Sessions</a
+        >
+        <a
+          href="#"
+          class="nav-tab"
+          :class="[activeTab === 'tags' ? 'nav-tab-active' : '']"
+          @click="(event) => changeTab(event, 'tags')"
+          >Schlagwörter</a
+        >
+      </nav>
+      <seminar-editor
+        v-if="activeTab === 'seminars'"
+        :tags="event.tags"
+        :sessions="event.sessions"
+        :speakers="event.speakers"
+        :event_id="id"
+      >
+      </seminar-editor>
+      <session-editor
+        v-if="activeTab === 'sessions'"
+        :sessions-preloaded="event.sessions"
+        :event_id="id"
+        @update-event-data="refresh"
+      >
+      </session-editor>
+      <tag-editor
+        v-if="activeTab === 'tags'"
+        :tags-preloaded="event.tags"
+        :event_id="id"
+        @update-event-data="refresh"
+      >
+      </tag-editor>
     </template>
   </div>
 </template>
@@ -27,13 +69,17 @@ export default {
   data() {
     return {
       id: parseInt(this.$route.params.event_id),
-      event: null
+      event: null,
+      activeTab: "seminars",
     };
   },
-  async created() {
-    this.event = await getEvent(this.id);
+  created() {
+    this.loadEvent();
   },
   methods: {
+    async loadEvent() {
+      this.event = await getEvent(this.id);
+    },
     async updateEvent(event) {
       event.id = this.id;
       const result = await updateEvent(event);
@@ -43,6 +89,13 @@ export default {
         alert(`Event ${event.name} wurde aktualisiert!`);
         this.$router.push("/");
       }
+    },
+    changeTab(event, newTab) {
+      event.preventDefault();
+      this.activeTab = newTab;
+    },
+    refresh() {
+      this.loadEvent();
     },
   },
 };

@@ -73,7 +73,13 @@ class Tags extends WP_REST_Controller {
         $response = NULL;
         if ($request["event_id"]) {
             $query = "SELECT * FROM `{$this->prefix}tags` WHERE event_id = {$request["event_id"]}";
-            $response = $wpdb->get_results($query);
+            $response = $wpdb->get_results($query, "ARRAY_A");
+
+            foreach ($response as &$tag) {
+                $query = "SELECT * FROM `{$this->prefix}tags_to_seminars` WHERE tag_id = {$tag["id"]}";
+                $seminars = $wpdb->get_results($query, "ARRAY_A");
+                $tag["count"] = count($seminars);
+            }
         } else {
             $response = array("error" => "Keine Event ID angegeben");
         }

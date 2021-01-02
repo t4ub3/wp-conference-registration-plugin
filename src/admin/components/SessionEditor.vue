@@ -8,7 +8,11 @@
           <form @submit="submit" class="edit-session-form form-wrap">
             <div class="form-field">
               <label for="crep-session-name">Name</label>
-              <input id="crep-session-name" v-model="newSession.name" type="text" />
+              <input
+                id="crep-session-name"
+                v-model="newSession.name"
+                type="text"
+              />
             </div>
             <p class="submit">
               <button class="button button-primary" type="submit">
@@ -34,9 +38,15 @@
           >
             <template slot="name" slot-scope="data">
               <div v-if="!data.row.editing">{{ data.row.name }}</div>
-              <form class="session-editor__update-form" v-else @submit="(event) => submitUpdate(event, data.row)">
+              <form
+                class="session-editor__update-form"
+                v-else
+                @submit="(event) => submitUpdate(event, data.row)"
+              >
                 <input type="text" v-model="data.row.name" />
-                <button class="button button-primary" type="submit">Speichern</button>
+                <button class="button button-primary" type="submit">
+                  Speichern
+                </button>
               </form>
             </template>
           </list-table>
@@ -62,7 +72,7 @@ export default {
   props: {
     sessionsPreloaded: {
       type: Array,
-      default: () => ([])
+      default: () => [],
     },
     event_id: {
       type: Number,
@@ -75,7 +85,10 @@ export default {
         name: "",
         event_id: this.event_id,
       },
-      sessions: this.sessionsPreloaded.map((session) => ({ ...session, editing: false })),
+      sessions: this.sessionsPreloaded.map((session) => ({
+        ...session,
+        editing: false,
+      })),
       per_page: 50,
       text: {
         select_bulk_action: "Mehrfachaktionen auswählen",
@@ -88,7 +101,7 @@ export default {
           label: "Name",
         },
         count: {
-          label: "Anzahl",
+          label: "Anzahl Seminare",
         },
       },
       actions: [
@@ -123,6 +136,7 @@ export default {
       }
       this.sessions = result.map((session) => ({ ...session, editing: false }));
       this.per_page = this.sessions.length;
+      this.$emit("update-event-data");
     },
 
     async submit(event) {
@@ -185,6 +199,6 @@ export default {
   padding-top: 30px;
 }
 .session-editor__update-form {
-    display: flex;
+  display: flex;
 }
 </style>
