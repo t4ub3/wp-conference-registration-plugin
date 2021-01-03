@@ -1,9 +1,9 @@
 <template>
   <div id="crep-seminar-list">
     <div class="crep-seminar" v-for="seminar in seminars" :key="seminar.id">
-      <div v-if="seminar.number" class="crep-seminar__number">{{ seminar.number }}</div>
+      <div v-if="seminar.number" class="crep-seminar__number">{{ seminar.number.padStart(2, "0") }}</div>
       <div class="crep-seminar__content">
-        <h2 class="crep-seminar__name">{{ seminar.name }}</h2>
+        <h4 class="crep-seminar__name">{{ seminar.name }}</h4>
         <p class="crep-seminar__description">{{ seminar.description }}</p>
         <small class="crep-seminar__speakers">{{ getSpeakers(seminar.speaker_ids) }}</small>
         <ul v-if="seminar.tag_ids.length" class="crep-seminar__tags">
@@ -61,11 +61,17 @@ export default {
 <style scoped>
 .crep-seminar {
   display: flex;
+  align-items: flex-start;
+  padding-bottom: 24px;
 }
 .crep-seminar__number {
   background-color: #A21B2A;
   color: white;
   padding: 4px;
+  min-width: 34px;
+  margin-right: 16px;
+  text-align: center;
+  font-weight: bold;
 }
 .crep-seminar__content {
 
@@ -81,12 +87,16 @@ export default {
   font-weight: bold;
 }
 .crep-seminar__tags {
-  
+  padding: 0;
+  list-style: none;
+  text-align: right;
 }
 .crep-seminar__tag {
-  background-color: #022232;
+  background-color: #7A7171;
   color: white;
-  padding: 4px;
-  border-radius: 5px;  
+  padding: 0 6px;
+  border-radius: 7px;  
+  display: inline-block;
+  font-size: medium;
 }
 </style>
