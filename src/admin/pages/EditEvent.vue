@@ -49,6 +49,7 @@
         v-if="activeTab === 'registrations'"
         :sessions="event.sessions"
         :seminars="event.seminars"
+        :additional-params="event.additional_params"
         :event_id="id"
         @update-event-data="refresh"
       >
@@ -81,7 +82,13 @@ import { getEvent, updateEvent } from "../utils/api-services";
 
 export default {
   name: "EditEvent",
-  components: { EditEventForm, TagEditor, SessionEditor, SeminarEditor, RegistrationEditor },
+  components: {
+    EditEventForm,
+    TagEditor,
+    SessionEditor,
+    SeminarEditor,
+    RegistrationEditor,
+  },
   data() {
     return {
       id: parseInt(this.$route.params.event_id),

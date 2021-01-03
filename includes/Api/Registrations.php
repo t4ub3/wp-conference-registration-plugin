@@ -45,7 +45,7 @@ class Registrations extends WP_REST_Controller
                 array(
                     'methods'             => \WP_REST_Server::CREATABLE,
                     'callback'            => array($this, 'create_registration'),
-                    'permission_callback' => array($this, 'check_admin'),
+                    'permission_callback' => array($this, 'check_frontend'),
                 )
             )
         );
@@ -149,6 +149,7 @@ class Registrations extends WP_REST_Controller
                 'surname' => $parameters["surname"],
                 'contact_mail'  => $parameters["contact_mail"] ?: NULL,
                 'confirmed'  => $parameters["confirmed"] ?: 0,
+                'additional_params' => $parameters["additional_params"],
                 'event_id' => $parameters["event_id"]
             ));
 
@@ -196,6 +197,7 @@ class Registrations extends WP_REST_Controller
                 'surname' => $parameters["surname"],
                 'contact_mail'  => $parameters["contact_mail"] ?: NULL,
                 'confirmed'  => $parameters["confirmed"] ?: 1,
+                'additional_params' => $parameters["additional_params"],
             ), array('id' => $registration_id));
 
             if ($wpdb->last_error) {
@@ -254,6 +256,10 @@ class Registrations extends WP_REST_Controller
     public function check_admin()
     {
         return current_user_can('administrator');
+    }
+    public function check_frontend()
+    {
+        return true;
     }
 
     /****************************************************************************************

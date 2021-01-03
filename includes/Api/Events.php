@@ -137,7 +137,8 @@ class Events extends WP_REST_Controller
             $result = $wpdb->insert("{$this->prefix}events", array(
                 'name' => $parameters["name"],
                 'contact_mail' => $parameters["contact_mail"],
-                'default_slot_max' => $parameters["default_slot_max"]
+                'default_slot_max' => $parameters["default_slot_max"],
+                'additional_params' => $parameters["additional_params"]
             ));
 
             if ($wpdb->last_error) {
@@ -169,7 +170,8 @@ class Events extends WP_REST_Controller
             $result = $wpdb->update("{$this->prefix}events", array(
                 'name' => $parameters["name"],
                 'contact_mail' => $parameters["contact_mail"],
-                'default_slot_max' => $parameters["default_slot_max"]
+                'default_slot_max' => $parameters["default_slot_max"],
+                'additional_params' => $parameters["additional_params"]
             ), array('id' => $request["id"]));
 
             if ($wpdb->last_error) {

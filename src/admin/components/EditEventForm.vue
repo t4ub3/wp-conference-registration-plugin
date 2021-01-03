@@ -23,7 +23,7 @@
         </td>
       </tr>
       <tr class="form-field">
-        <th scope="row">max. Teilnehmer je Seminar </th>
+        <th scope="row">max. Teilnehmer je Seminar</th>
         <td>
           <input
             id="crep-contact"
@@ -32,7 +32,18 @@
             class="edit-event-form__number-field"
           />
           <p class="description">
-            Die Anzahl kann später pro Seminar geändert werden. Wenn es kein Teilnehmer-Limit geben soll, bitte 0 eintragen.
+            Die Anzahl kann später pro Seminar geändert werden. Wenn es kein
+            Teilnehmer-Limit geben soll, bitte 0 eintragen.
+          </p>
+        </td>
+      </tr>
+      <tr class="form-field">
+        <th scope="row">Weitere Felder</th>
+        <td>
+          <textarea v-model="newEvent.additional_params" />
+          <p class="description">
+            Zusätzliche Felder für das Anmeldeformular können hier im JSON
+            Format eingetragen werden. Nur ändern, wenn man weiß, was man tut :)
           </p>
         </td>
       </tr>
@@ -57,6 +68,7 @@ export default {
         name: "",
         contact_mail: "",
         default_slot_max: 25,
+        additional_params: "",
       }),
     },
   },
@@ -66,6 +78,7 @@ export default {
         name: this.event.name,
         contact_mail: this.event.contact_mail,
         default_slot_max: this.event.default_slot_max,
+        additional_params: this.event.additional_params,
       },
     };
   },
@@ -79,7 +92,7 @@ export default {
 </script>
 
 <style scoped>
-  .edit-event-form .edit-event-form__number-field {
-    width: 80px;
-  }
+.edit-event-form .edit-event-form__number-field {
+  width: 80px;
+}
 </style>

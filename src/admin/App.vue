@@ -11,5 +11,7 @@ export default {
 </script>
 
 <style>
-
+input[type="text"].multiselect__input {
+    border: none;
+}
 </style>

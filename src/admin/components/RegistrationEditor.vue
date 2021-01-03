@@ -2,10 +2,17 @@
   <div class="registration-editor">
     <div>
       <h1 class="registration-editor__headline">Anmeldungen</h1>
-      <router-link v-if="sessions.length" :to="`/${event_id}/new-registration`" class="page-title-action">
+      <router-link
+        v-if="sessions.length"
+        :to="`/${event_id}/new-registration`"
+        class="page-title-action"
+      >
         Neue Anmeldung erstellen
       </router-link>
-      <em v-else>&nbsp; (Sie müssen zuerst Sessions und Seminare anlegen, um Anmeldungen erstellen zu können)</em>
+      <em v-else
+        >&nbsp; (Sie müssen zuerst Sessions und Seminare anlegen, um Anmeldungen
+        erstellen zu können)</em
+      >
     </div>
     <list-table
       :rows="registrations"
@@ -32,6 +39,7 @@ import {
   getRegistrations,
   getSpeakers,
 } from "../utils/api-services";
+import { parseJSONStringArray, parseJSONStringObject } from "../utils/helpers";
 import ListTable from "vue-wp-list-table";
 import "vue-wp-list-table/dist/vue-wp-list-table.css";
 
@@ -51,6 +59,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    additionalParams: {
+      type: String,
+      default: "[]",
+    },
   },
   data() {
     return {
@@ -59,6 +71,7 @@ export default {
         event_id: this.event_id,
       },
       seminar_map: {},
+      additionalParams_parsed: parseJSONStringArray(this.additionalParams),
       registrations: [],
       per_page: 50,
       text: {
@@ -69,19 +82,19 @@ export default {
       },
       columns: {
         first_name: {
-          label: "Vorname"
+          label: "Vorname",
         },
         surname: {
-          label: "Nachname"
+          label: "Nachname",
         },
         contact_mail: {
-          label: "E-Mail"
+          label: "E-Mail",
         },
         confirmed: {
-          label: "Bestätigt"
+          label: "Bestätigt",
         },
         registration_date: {
-          label: "Anmeldedatum"
+          label: "Anmeldedatum",
         },
       },
       actions: [
@@ -107,8 +120,11 @@ export default {
       this.seminar_map[seminar.id] = seminar.name;
     });
     this.loadRegistrations();
-    this.sessions.forEach(session => {
-      this.columns[`session_${session.id}`] = {label: session.name};
+    this.sessions.forEach((session) => {
+      this.columns[`session_${session.id}`] = { label: session.name };
+    });
+    this.additionalParams_parsed.forEach((param) => {
+      this.columns[param.code] = { label: param.name };
     });
   },
   methods: {
@@ -118,9 +134,17 @@ export default {
         alert(result.error);
         return;
       }
-      result.forEach(registration => {
-        registration.seminars.forEach(seminar => {
-          registration[`session_${seminar.session_id}`] = this.seminar_map[seminar.seminar_id];
+      result.forEach((registration) => {
+        registration.seminars.forEach((seminar) => {
+          registration[`session_${seminar.session_id}`] = this.seminar_map[
+            seminar.seminar_id
+          ];
+        });
+        const additionalParams = parseJSONStringObject(
+          registration.additional_params
+        );
+        this.additionalParams_parsed.forEach((param) => {
+          registration[param.code] = additionalParams[param.code] || "";
         });
       });
       this.registrations = result;
@@ -129,7 +153,11 @@ export default {
 
     async onActionClick(action, row) {
       if ("delete" === action) {
-        if (confirm(`Anmeldung für ${row.first_name} ${row.surname} wirklich löschen?`)) {
+        if (
+          confirm(
+            `Anmeldung für ${row.first_name} ${row.surname} wirklich löschen?`
+          )
+        ) {
           const result = await deleteRegistrations([row.id]);
           if (result.error) {
             alert(result.error);
@@ -139,7 +167,9 @@ export default {
           }
         }
       } else if ("edit" === action) {
-        this.$router.push({ path: `/${this.event_id}/edit-registration/${row.id}` });
+        this.$router.push({
+          path: `/${this.event_id}/edit-registration/${row.id}`,
+        });
       }
     },
 

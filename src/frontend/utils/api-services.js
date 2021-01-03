@@ -27,6 +27,15 @@ export async function getSeminars(event_id) {
     }))
 }
 
+// ===== Registrations Api ==================================================== //
+
+export async function createRegistration(registration) {
+    return await safeRequest({
+        method: "post",
+        url: `${baseUrl}registrations`,
+        data: registration
+    });
+}
 
 // ===== Helpers ============================================================== //
 

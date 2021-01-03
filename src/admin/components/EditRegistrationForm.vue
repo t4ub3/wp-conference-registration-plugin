@@ -44,6 +44,25 @@
         </td>
       </tr>
     </table>
+    <template v-if="additionalParamFields.length">
+      <h2>Sonstiges</h2>
+      <table class="form-table" role="presentation">
+        <tr
+          class="form-field"
+          v-for="param in additionalParamFields"
+          :key="param.code"
+        >
+          <th scope="row">{{ param.name }}</th>
+          <td>
+            <input
+              type="text"
+              v-model="newRegistration.additional_params[param.code]"
+            />
+          </td>
+        </tr>
+      </table>
+    </template>
+
     <button class="button button-primary" type="submit">
       {{ buttonText }}
     </button>
@@ -52,6 +71,7 @@
 
 <script>
 import { getRegistration, getEvent } from "../utils/api-services";
+import { parseJSONStringArray, parseJSONStringObject } from "../utils/helpers";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
 
@@ -77,7 +97,8 @@ export default {
         first_name: "",
         surname: "",
         contact_mail: "",
-        event_id: this.eventId
+        event_id: this.eventId,
+        additional_params: {},
       },
       event: {
         sessions: [],
@@ -85,6 +106,7 @@ export default {
       },
       seminar_map: {},
       seminarSelections: [],
+      additionalParamFields: [],
     };
   },
   async created() {
@@ -95,6 +117,9 @@ export default {
       this.newRegistration.first_name = registration.first_name;
       this.newRegistration.surname = registration.surname;
       this.newRegistration.contact_mail = registration.contact_mail;
+      this.newRegistration.additional_params = parseJSONStringObject(
+        registration.additional_params
+      );
     }
 
     this.event = await getEvent(this.eventId);
@@ -116,14 +141,29 @@ export default {
       });
 
       if (registration && registration.seminars) {
-        registration.seminars.forEach(seminarPreloaded => {
+        registration.seminars.forEach((seminarPreloaded) => {
           if (seminarPreloaded.session_id === session.id) {
-            seminarSelection.value = {code: seminarPreloaded.seminar_id, name: this.seminar_map[seminarPreloaded.seminar_id]};
+            seminarSelection.value = {
+              code: seminarPreloaded.seminar_id,
+              name: this.seminar_map[seminarPreloaded.seminar_id],
+            };
           }
         });
       }
 
       this.seminarSelections.push(seminarSelection);
+    });
+    this.additionalParamFields = parseJSONStringArray(
+      this.event.additional_params
+    );
+    this.additionalParamFields.forEach((param) => {
+      if (
+        !Object.keys(this.newRegistration.additional_params).includes(
+          param.code
+        )
+      ) {
+        this.newRegistration.additional_params[param.code] = "";
+      }
     });
   },
   methods: {
@@ -138,6 +178,9 @@ export default {
           });
         }
       });
+      this.newRegistration.additional_params = JSON.stringify(
+        this.newRegistration.additional_params
+      );
       this.$emit("registration-submit", this.newRegistration);
     },
   },
