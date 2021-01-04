@@ -60,7 +60,7 @@
         </multiselect>
       </template>
     </fieldset>
-    <template v-if="additionalParamFields.length">
+    <template>
       <h4 class="registration-form__headline">Sonstiges</h4>
       <fieldset class="registration-form__set">
         <template v-for="param in additionalParamFields">
@@ -77,6 +77,24 @@
             v-model="newRegistration.additional_params[param.code]"
           />
         </template>
+        <div class="registration-form__label">
+          <input
+            type="checkbox"
+            id="crep_consent"
+            v-model="newRegistration.consent"
+          />
+          <label
+            class="registration-form__label registration-form__inline"
+            for="crep_consent"
+            >Mit der Nutzung dieses Formulars erkläre ich mich mit der
+            Speicherung und Verarbeitung meiner Daten durch diese Website
+            einverstanden.</label
+          >
+        </div>
+        <div class="registration-form__label">
+          <span class="registration-form__equation">{{ equation.summand }}&nbsp;&nbsp;+&nbsp;&nbsp;{{ equation.addend }}&nbsp;&nbsp;=&nbsp;</span>
+          <input class="registration-form__number" type="text" v-model="newRegistration.result"/>
+        </div>
       </fieldset>
     </template>
 
@@ -86,7 +104,7 @@
 
 <script>
 import { getEvent, createRegistration } from "./utils/api-services";
-import { parseJSONStringArray } from "./utils/helpers";
+import { parseJSONStringArray, getEquationData } from "./utils/helpers";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
 
@@ -101,12 +119,14 @@ export default {
   },
   data() {
     return {
-      newRegistration: {
+      newRegistration: {        
         first_name: "",
         surname: "",
         contact_mail: "",
         event_id: this.eventId,
         additional_params: {},
+        consent: false,
+        result: "",
       },
       event: {
         sessions: [],
@@ -115,6 +135,7 @@ export default {
       seminar_map: {},
       seminarSelections: [],
       additionalParamFields: [],
+      equation: getEquationData(),
     };
   },
   async created() {
@@ -155,6 +176,7 @@ export default {
   methods: {
     submit(event) {
       event.preventDefault();
+      //TODO: equation und required fields prüfen
       this.newRegistration.seminars = [];
       this.seminarSelections.forEach((seminarSelection) => {
         if (seminarSelection.value && seminarSelection.value.code) {
@@ -168,6 +190,8 @@ export default {
         this.newRegistration.additional_params
       );
       this.newRegistration.confirmed = 0;
+      this.newRegistration.number_one = this.equation.summand;
+      this.newRegistration.number_two = this.equation.addend;
       const result = createRegistration(this.newRegistration);
       alert(
         result.error
@@ -184,8 +208,17 @@ export default {
   display: block;
   width: 100%;
 }
+.registration-form__inline {
+  display: inline;
+}
 .registration-form__label {
   margin-top: 16px;
+}
+.registration-form__number {
+  width: 100px;
+}
+.registration-form__equation {
+  font-weight: bold;
 }
 .registration-form__set {
   margin: 0 0 56px 16px;

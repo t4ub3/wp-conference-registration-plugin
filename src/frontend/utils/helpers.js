@@ -11,3 +11,14 @@ export function parseJSONStringArray(input) {
     }
     return output;
 }
+
+export function getEquationData() {
+    const data = { summand: getRandomInt(1, 21), addend: getRandomInt(1, 21) }
+    return { ...data, sum: data.summand + data.addend };
+}
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min);
+}
