@@ -50,6 +50,7 @@ export default {
   async created() {
     this.event = await getEvent(this.eventId);
     this.seminars = await getSeminars(this.eventId);
+    this.seminars.sort( this.compareSeminarByNumber );
     this.event.sessions.forEach((session) => {
       this.session_map[session.id] = session.name;
     });
@@ -76,6 +77,17 @@ export default {
       });
       return speakers.slice(0, -3);
     },
+    compareSeminarByNumber(a, b) {
+      let aInt = parseInt(a.number);
+      let bInt = parseInt(b.number);
+      if (aInt < bInt) {
+        return -1;
+      }
+      if (aInt > bInt) {
+        return 1;
+      }
+      return 0;
+    },
   },
 };
 </script>
@@ -97,6 +109,7 @@ export default {
 }
 .crep-seminar__name {
   color: #a21b2a;
+  margin-top: 0;
 }
 .crep-seminar__description {
   color: #022232;

@@ -2,10 +2,17 @@
   <div class="seminar-editor">
     <div>
       <h1 class="seminar-editor__headline">Seminare</h1>
-      <router-link v-if="sessions.length" :to="`/${event_id}/new-seminar`" class="page-title-action">
+      <router-link
+        v-if="sessions.length"
+        :to="`/${event_id}/new-seminar`"
+        class="page-title-action"
+      >
         Neues Seminar erstellen
       </router-link>
-      <em v-else>&nbsp; (Sie müssen zuerst Sessions anlegen, um Seminare erstellen zu können)</em>
+      <em v-else
+        >&nbsp; (Sie müssen zuerst Sessions anlegen, um Seminare erstellen zu
+        können)</em
+      >
     </div>
     <list-table
       :rows="seminars"
@@ -14,10 +21,13 @@
       :columns="columns"
       :actions="actions"
       :bulk-actions="bulk_actions"
+      :sortBy="sortBy"
+      :sortOrder="sortOrder"
       action-column="name"
       notFound="Keine Einträge gefunden"
       @action:click="onActionClick"
       @bulk:click="onBulkActionClick"
+      @sort="sortCallback"
     >
       <template slot="speakers" slot-scope="data">
         <ul class="seminar-editor__list">
@@ -98,24 +108,30 @@ export default {
       columns: {
         name: {
           label: "Name",
+          sortable: true,
         },
         number: {
           label: "Nummer",
+          sortable: true,
         },
         description: {
           label: "Beschreibung",
         },
         speakers: {
           label: "Referenten",
+          sortable: true,
         },
         sessions: {
           label: "Sessions",
+          sortable: true,
         },
         slot_max: {
           label: "max. Teilnehmerzahl",
+          sortable: true,
         },
         tags: {
           label: "Schlagwörter",
+          sortable: true,
         },
       },
       actions: [
@@ -134,6 +150,8 @@ export default {
           label: "Löschen",
         },
       ],
+      sortBy: "number",
+      sortOrder: "asc",
     };
   },
   created() {
@@ -192,6 +210,21 @@ export default {
           }
         }
       }
+    },
+
+    sortCallback(column, order) {
+      this.sortBy = column;
+      this.sortOrder = order;
+      function compareSeminars(a, b) {
+        if (a[column] < b[column]) {
+          return order === "asc" ? -1 : 1;
+        }
+        if (a[column] > b[column]) {
+          return order === "asc" ? 1 : -1;
+        }
+        return 0;
+      }
+      this.seminars.sort(compareSeminars);
     },
   },
 };
