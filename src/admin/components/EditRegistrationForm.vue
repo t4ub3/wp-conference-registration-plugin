@@ -3,15 +3,15 @@
     <h2>Persönliche Daten</h2>
     <table class="form-table" role="presentation">
       <tr class="form-field">
-        <th scope="row">Vorname</th>
+        <th scope="row">Vorname*</th>
         <td>
-          <input v-model="newRegistration.first_name" type="text" />
+          <input v-model="newRegistration.first_name" required type="text" />
         </td>
       </tr>
       <tr class="form-field">
-        <th scope="row">Nachname</th>
+        <th scope="row">Nachname*</th>
         <td>
-          <input v-model="newRegistration.surname" type="text" />
+          <input v-model="newRegistration.surname" required type="text" />
         </td>
       </tr>
       <tr class="form-field">
@@ -52,17 +52,20 @@
           v-for="param in additionalParamFields"
           :key="param.code"
         >
-          <th scope="row">{{ param.name }}</th>
+          <th scope="row">{{ param.name + (param.required ? '*' : '') }}</th>
           <td>
             <input
               type="text"
+              :required="param.required"
               v-model="newRegistration.additional_params[param.code]"
             />
           </td>
         </tr>
       </table>
     </template>
-
+    <p>
+      <em>* = Pflichtfeld</em>
+    </p>
     <button class="button button-primary" type="submit">
       {{ buttonText }}
     </button>

@@ -17,9 +17,9 @@
         </td>
       </tr>
       <tr class="form-field">
-        <th scope="row">Name</th>
+        <th scope="row">Name*</th>
         <td>
-          <input id="crep-name" v-model="newSeminar.name" type="text" />
+          <input id="crep-name" v-model="newSeminar.name" required type="text" />
         </td>
       </tr>
       <tr class="form-field">
@@ -44,7 +44,7 @@
         </td>
       </tr>
       <tr class="form-field">
-        <th scope="row">Sessions</th>
+        <th scope="row">Sessions*</th>
         <td>
           <multiselect
             class="edit-seminar-form__fullwidth-field"
@@ -95,6 +95,9 @@
         </td>
       </tr>
     </table>
+    <p>
+      <em>* = Pflichtfeld</em>
+    </p>
     <button class="button button-primary" type="submit">
       {{ buttonText }}
     </button>

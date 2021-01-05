@@ -2,17 +2,18 @@
   <form @submit="submit" class="edit-event-form">
     <table class="form-table" role="presentation">
       <tr class="form-field">
-        <th scope="row">Name</th>
+        <th scope="row">Name*</th>
         <td>
-          <input id="crep-name" v-model="newEvent.name" type="text" />
+          <input id="crep-name" v-model="newEvent.name" required type="text" />
         </td>
       </tr>
       <tr class="form-field">
-        <th scope="row">Kontakt</th>
+        <th scope="row">Kontakt*</th>
         <td>
           <input
             id="crep-contact"
             v-model="newEvent.contact_mail"
+            required 
             type="text"
           />
           <p class="description">
@@ -48,6 +49,9 @@
         </td>
       </tr>
     </table>
+    <p>
+      <em>* = Pflichtfeld</em>
+    </p>
     <button class="button button-primary" type="submit">
       {{ buttonText }}
     </button>

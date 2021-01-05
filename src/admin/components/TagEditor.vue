@@ -39,7 +39,7 @@
                 v-else
                 @submit="(event) => submitUpdate(event, data.row)"
               >
-                <input type="text" v-model="data.row.name" />
+                <input type="text" required v-model="data.row.name" />
                 <button class="button button-primary" type="submit">
                   Speichern
                 </button>

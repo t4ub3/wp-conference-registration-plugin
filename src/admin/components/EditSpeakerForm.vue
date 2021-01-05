@@ -1,16 +1,21 @@
 <template>
   <form @submit="submit" class="edit-speaker-form">
-    <table class="form-table" role="presentation">      
+    <table class="form-table" role="presentation">
       <tr class="form-field">
-        <th scope="row">Vorname</th>
+        <th scope="row">Vorname*</th>
         <td>
-          <input id="crep-first_name" v-model="newSpeaker.first_name" type="text" />
+          <input
+            id="crep-first_name"
+            v-model="newSpeaker.first_name"
+            required
+            type="text"
+          />
         </td>
       </tr>
       <tr class="form-field">
-        <th scope="row">Nachname</th>
+        <th scope="row">Nachname*</th>
         <td>
-          <input id="crep-surname" v-model="newSpeaker.surname" type="text" />
+          <input id="crep-surname" required v-model="newSpeaker.surname" type="text" />
         </td>
       </tr>
       <tr class="form-field">
@@ -28,10 +33,17 @@
       <tr class="form-field">
         <th scope="row">Pfad zum Bild</th>
         <td>
-          <input id="crep-path_to_picture" v-model="newSpeaker.path_to_picture" type="text" />
+          <input
+            id="crep-path_to_picture"
+            v-model="newSpeaker.path_to_picture"
+            type="text"
+          />
         </td>
       </tr>
     </table>
+    <p>
+      <em>* = Pflichtfeld</em>
+    </p>
     <button class="button button-primary" type="submit">
       {{ buttonText }}
     </button>
