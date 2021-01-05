@@ -5,34 +5,37 @@
       <label
         class="registration-form__block registration-form__label"
         for="crep-first-name"
-        >Vorname:</label
+        >Vorname:<em> (Pflichtfeld)</em></label
       >
       <input
         class="registration-form__block"
         type="text"
         id="crep-first-name"
+        required
         v-model="newRegistration.first_name"
       />
       <label
         class="registration-form__block registration-form__label"
         for="crep-surname"
-        >Nachname:</label
+        >Nachname:<em> (Pflichtfeld)</em></label
       >
       <input
         class="registration-form__block"
         type="text"
         id="crep-surname"
+        required
         v-model="newRegistration.surname"
       />
       <label
         class="registration-form__block registration-form__label"
         for="crep-contact_mail"
-        >E-Mail-Adresse:</label
+        >E-Mail-Adresse:<em> (Pflichtfeld)</em></label
       >
       <input
         class="registration-form__block"
         type="email"
         id="crep-contact_mail"
+        required
         v-model="newRegistration.contact_mail"
       />
     </fieldset>
@@ -68,11 +71,13 @@
             class="registration-form__block registration-form__label"
             :key="`label_${param.code}`"
             :for="param.code"
-            >{{ param.name }}</label
+            >{{ param.name }}
+            <em v-if="param.required"> (Pflichtfeld)</em></label
           >
           <input
             class="registration-form__block"
             :key="param.code"
+            :required="param.required"
             type="text"
             v-model="newRegistration.additional_params[param.code]"
           />
@@ -81,6 +86,7 @@
           <input
             type="checkbox"
             id="crep_consent"
+            required
             v-model="newRegistration.consent"
           />
           <label
@@ -88,12 +94,21 @@
             for="crep_consent"
             >Mit der Nutzung dieses Formulars erkläre ich mich mit der
             Speicherung und Verarbeitung meiner Daten durch diese Website
-            einverstanden.</label
+            einverstanden.<em> (Pflichtfeld)</em></label
           >
         </div>
         <div class="registration-form__label">
-          <span class="registration-form__equation">{{ equation.summand }}&nbsp;&nbsp;+&nbsp;&nbsp;{{ equation.addend }}&nbsp;&nbsp;=&nbsp;</span>
-          <input class="registration-form__number" type="text" v-model="newRegistration.result"/>
+          <span class="registration-form__equation"
+            >{{ equation.summand }}&nbsp;&nbsp;+&nbsp;&nbsp;{{
+              equation.addend
+            }}&nbsp;&nbsp;=&nbsp;</span
+          >
+          <input
+            class="registration-form__number"
+            type="text"
+            required
+            v-model="newRegistration.result"
+          /><em> (Pflichtfeld)</em>
         </div>
       </fieldset>
     </template>
@@ -119,7 +134,7 @@ export default {
   },
   data() {
     return {
-      newRegistration: {        
+      newRegistration: {
         first_name: "",
         surname: "",
         contact_mail: "",
@@ -136,6 +151,7 @@ export default {
       seminarSelections: [],
       additionalParamFields: [],
       equation: getEquationData(),
+      requiredFields: ["Vorname", "Nachname", "E-Mail-Adresse"]
     };
   },
   async created() {
@@ -171,12 +187,27 @@ export default {
       ) {
         this.newRegistration.additional_params[param.code] = "";
       }
+      if (param.required) {
+        this.requiredFields.push(param.name);
+      }
     });
   },
   methods: {
     submit(event) {
       event.preventDefault();
-      //TODO: equation und required fields prüfen
+      const empty_required_fields = this.additionalParamFields.filter(param => param.required && !this.newRegistration.additional_params[param.code]);
+      if (empty_required_fields.length || !this.newRegistration.first_name || !this.newRegistration.surname || !this.newRegistration.contact_mail) {
+        alert("Die Felder:\n\n" + this.requiredFields.join(', ') + "\n\nsind Pflichtfelder und müssen angegeben werden!");
+        return;
+      }
+      if (!this.newRegistration.consent) {
+        alert("Bitte bestätige den Hinweis zum Datenschutz, um dich anzumelden!");
+        return;
+      }
+      if (this.newRegistration.result === "" || parseInt(this.newRegistration.result) !== this.equation.sum) {
+        alert("Bitte gib die korrekte Summe an, um zu bestätigen, dass du kein Roboter bist.");
+        return;
+      }
       this.newRegistration.seminars = [];
       this.seminarSelections.forEach((seminarSelection) => {
         if (seminarSelection.value && seminarSelection.value.code) {
