@@ -7,7 +7,7 @@
       </router-link>
     </div>
     <list-table
-      :rows="items"
+      :rows="speakers"
       :perPage="per_page"
       :text="text"
       :columns="columns"
@@ -26,6 +26,7 @@
 import ListTable from "vue-wp-list-table";
 import "vue-wp-list-table/dist/vue-wp-list-table.css";
 import { deleteSpeakers, getSpeakers } from "../utils/api-services";
+import { truncate } from '../utils/helpers';
 
 export default {
   name: "Speakers",
@@ -36,7 +37,7 @@ export default {
 
   data() {
     return {
-      items: [],
+      speakers: [],
       per_page: 20,
       text: {
         select_bulk_action: "Mehrfachaktionen auswählen",
@@ -91,8 +92,11 @@ export default {
         alert(result.error);
         return;
       }
-      this.items = result;
-      this.per_page = this.items.length;
+      this.speakers = result.map(speaker => ({
+        ...speaker,
+        description: truncate(speaker.description, 100)
+      }));
+      this.per_page = this.speakers.length;
     },
 
     async onActionClick(action, row) {

@@ -66,6 +66,7 @@ import {
 } from "../utils/api-services";
 import ListTable from "vue-wp-list-table";
 import "vue-wp-list-table/dist/vue-wp-list-table.css";
+import { truncate } from '../utils/helpers';
 
 export default {
   name: "SeminarEditor",
@@ -175,6 +176,7 @@ export default {
       }
       this.seminars = result.map((seminar) => ({
         ...seminar,
+        description: truncate(seminar.description, 100),
         sessions: seminar.session_ids.map((id) => this.session_map[id]),
         tags: seminar.tag_ids.map((id) => this.tag_map[id]),
         speakers: seminar.speaker_ids.map((id) => this.speaker_map[id]),
