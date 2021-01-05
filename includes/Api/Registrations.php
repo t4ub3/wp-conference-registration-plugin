@@ -45,7 +45,7 @@ class Registrations extends WP_REST_Controller
                 array(
                     'methods'             => \WP_REST_Server::CREATABLE,
                     'callback'            => array($this, 'create_registration'),
-                    'permission_callback' => array($this, 'check_frontend'),
+                    'permission_callback' => array($this, 'check_admin'),
                 )
             )
         );
@@ -68,6 +68,17 @@ class Registrations extends WP_REST_Controller
                     'args' => [
                         'id'
                     ]
+                )
+            )
+        );
+        register_rest_route(
+            $this->namespace,
+            '/' . $this->rest_base . '/validate',
+            array(
+                array(
+                    'methods'             => \WP_REST_Server::CREATABLE,
+                    'callback'            => array($this, 'create_registration_validate'),
+                    'permission_callback' => array($this, 'check_frontend'),
                 )
             )
         );
@@ -248,6 +259,44 @@ class Registrations extends WP_REST_Controller
         }
 
         return rest_ensure_response($response);
+    }
+
+    /**
+     * Creates a new registration with validation (for public use).
+     *
+     * @param WP_REST_Request $request Full details about the request.
+     *
+     * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+     */
+    public function create_registration_validate($request) {
+        global $wpdb;
+        $parameters = $request->get_params();
+        if (!$parameters["consent"]) {
+            return rest_ensure_response(array("error" => "Bitte bestätige den Hinweis zum Datenschutz, um dich anzumelden!"));
+        }
+        if (!$parameters["contact_mail"]) {
+            return rest_ensure_response(array("error" => "Bitte gib deine E-Mail-Adresse an, um dich anzumelden!"));
+        }
+        if (intval($parameters["number_one"]) + intval($parameters["number_two"]) != intval($parameters["result"])) {
+            return rest_ensure_response(array("error" => "Bitte gib die korrekte Summe an, um zu bestätigen, dass du kein Roboter bist."));
+        }
+        $event_query = "SELECT * FROM `{$this->prefix}events` WHERE id = {$parameters["event_id"]};";
+        $list = $wpdb->get_results($event_query, "ARRAY_A");
+        if (count($list) < 1) {
+            return rest_ensure_response(array("error" => "Die Anmeldung konnte keinem Event zugeordnet werden."));
+        }
+        if (isset($list[0]["additional_params"]) && $list[0]["additional_params"] != "") {
+            $additional_fields = json_decode($list[0]["additional_params"]);
+            $additional_fields_params = json_decode($parameters["additional_params"], true);
+            foreach ($additional_fields as $field) {
+                if (isset($field->required) && $field->required == true && !$additional_fields_params[$field->code]) {
+                    return rest_ensure_response(array("error" => "Das Feld {$field->name} ist ein Pflichtfeld und muss angegeben werden!"));
+                }
+            }
+        }
+
+        // TODO: send mails
+        return $this->create_registration($request);
     }
 
     /****************************************************************************************

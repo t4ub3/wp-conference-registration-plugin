@@ -79,7 +79,7 @@
             :key="param.code"
             :required="param.required"
             type="text"
-            v-model="newRegistration.additional_params[param.code]"
+            v-model="newRegistration.additional_params_object[param.code]"
           />
         </template>
         <div class="registration-form__label">
@@ -131,6 +131,10 @@ export default {
       type: Number,
       required: true,
     },
+    redirectUrl: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -139,7 +143,7 @@ export default {
         surname: "",
         contact_mail: "",
         event_id: this.eventId,
-        additional_params: {},
+        additional_params_object: {},
         consent: false,
         result: "",
       },
@@ -181,11 +185,11 @@ export default {
     );
     this.additionalParamFields.forEach((param) => {
       if (
-        !Object.keys(this.newRegistration.additional_params).includes(
+        !Object.keys(this.newRegistration.additional_params_object).includes(
           param.code
         )
       ) {
-        this.newRegistration.additional_params[param.code] = "";
+        this.newRegistration.additional_params_object[param.code] = "";
       }
       if (param.required) {
         this.requiredFields.push(param.name);
@@ -193,9 +197,9 @@ export default {
     });
   },
   methods: {
-    submit(event) {
+    async submit(event) {
       event.preventDefault();
-      const empty_required_fields = this.additionalParamFields.filter(param => param.required && !this.newRegistration.additional_params[param.code]);
+      const empty_required_fields = this.additionalParamFields.filter(param => param.required && !this.newRegistration.additional_params_object[param.code]);
       if (empty_required_fields.length || !this.newRegistration.first_name || !this.newRegistration.surname || !this.newRegistration.contact_mail) {
         alert("Die Felder:\n\n" + this.requiredFields.join(', ') + "\n\nsind Pflichtfelder und müssen angegeben werden!");
         return;
@@ -218,17 +222,20 @@ export default {
         }
       });
       this.newRegistration.additional_params = JSON.stringify(
-        this.newRegistration.additional_params
+        this.newRegistration.additional_params_object
       );
       this.newRegistration.confirmed = 0;
       this.newRegistration.number_one = this.equation.summand;
       this.newRegistration.number_two = this.equation.addend;
-      const result = createRegistration(this.newRegistration);
+      const result = await createRegistration(this.newRegistration);
       alert(
-        result.error
-          ? "Beim Senden ist ein Fehler aufgetreten."
-          : "Deine Anmeldung wurde versandt. Du erhälst bald eine Bestätigungsmail. Vielen Dank!"
+        result.success
+          ? "Deine Anmeldung wurde versandt. Du erhälst bald eine Bestätigungsmail. Vielen Dank!"
+          : "Beim Senden ist ein Fehler aufgetreten:\n\n" + (result.error || "Unbekannter Fehler")
       );
+      if (result.success) {
+        window.location.href = this.redirectUrl;
+      }
     },
   },
 };

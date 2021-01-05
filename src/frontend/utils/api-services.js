@@ -32,7 +32,7 @@ export async function getSeminars(event_id) {
 export async function createRegistration(registration) {
     return await safeRequest({
         method: "post",
-        url: `${baseUrl}registrations`,
+        url: `${baseUrl}registrations/validate`,
         data: registration
     });
 }

@@ -23,7 +23,8 @@ if (mountRegistrationForm) {
     el: '#crep-registration-form',
     render: h => h(RegistrationForm, {
       props: {
-        eventId: parseInt(mountRegistrationForm.dataset.eventId)
+        eventId: parseInt(mountRegistrationForm.dataset.eventId),
+        redirectUrl: mountRegistrationForm.dataset.redirectUrl
       }
     })
   });

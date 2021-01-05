@@ -45,6 +45,9 @@ export default {
         apply: "Übernehmen",
       },
       columns: {
+        id: {
+          label: "ID"
+        },
         name: {
           label: "Event",
         },

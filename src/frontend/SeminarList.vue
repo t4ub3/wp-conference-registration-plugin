@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { getEvent, getSeminars } from "../admin/utils/api-services";
+import { getEvent, getSeminars } from "./utils/api-services";
 
 export default {
   name: "SeminarList",
