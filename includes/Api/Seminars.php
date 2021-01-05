@@ -85,7 +85,8 @@ class Seminars extends WP_REST_Controller
         global $wpdb;
         $response = [];
         if ($request["event_id"]) {
-            $query = "SELECT id FROM `{$this->prefix}seminars` WHERE event_id = {$request["event_id"]}";
+            $event_id = intval($request["event_id"]);
+            $query = "SELECT id FROM `{$this->prefix}seminars` WHERE event_id = {$event_id}";
             $seminar_ids = $wpdb->get_results($query, "ARRAY_A");
             foreach ($seminar_ids as $seminar_id) {
                 array_push($response, $this->get_seminar_with_lookups($seminar_id["id"]));
@@ -204,7 +205,7 @@ class Seminars extends WP_REST_Controller
 
         $parameters = $request->get_params();
         if ($parameters["name"] && $parameters["session_ids"]) {
-            $seminar_id = $request["id"];
+            $seminar_id = intval($request["id"]);
             $wpdb->update("{$this->prefix}seminars", array(
                 'name' => $parameters["name"],
                 'description' => $parameters["description"] ?: NULL,
@@ -297,7 +298,10 @@ class Seminars extends WP_REST_Controller
         global $wpdb;
 
         $values = "";
+        $seminar_id = intval($seminar_id);
+
         foreach ($entity_ids as $entity_id) {
+            $entity_id = intval($entity_id);
             $values .= "($entity_id, $seminar_id),";
         }
         $values = substr($values, 0, -1);
@@ -321,6 +325,7 @@ class Seminars extends WP_REST_Controller
     {
         global $wpdb;
         $response = NULL;
+        $seminar_id = intval($seminar_id);
 
         $event_query = "SELECT * FROM `{$this->prefix}seminars` WHERE id = {$seminar_id};";
         $list = $wpdb->get_results($event_query, "ARRAY_A");

@@ -199,7 +199,8 @@ class Events extends WP_REST_Controller
         $response = NULL;
 
         if ($request["id"]) {
-            $event_query = "SELECT * FROM `{$this->prefix}events` WHERE id = {$request["id"]};";
+            $event_id = intval($request["id"]);
+            $event_query = "SELECT * FROM `{$this->prefix}events` WHERE id = {$event_id};";
             $list = $wpdb->get_results($event_query, "ARRAY_A");
 
             if ($wpdb->last_error) {
@@ -208,7 +209,7 @@ class Events extends WP_REST_Controller
             }
             $response = $list[0];
 
-            $sessions_query = "SELECT * FROM `{$this->prefix}sessions` WHERE event_id = {$request["id"]};";
+            $sessions_query = "SELECT * FROM `{$this->prefix}sessions` WHERE event_id = {$event_id};";
             $list = $wpdb->get_results($sessions_query, "ARRAY_A");
 
             if ($wpdb->last_error) {
@@ -236,7 +237,7 @@ class Events extends WP_REST_Controller
             }
             $response["speakers"] = $list;
 
-            $tags_query = "SELECT * FROM `{$this->prefix}tags` WHERE event_id = {$request["id"]};";
+            $tags_query = "SELECT * FROM `{$this->prefix}tags` WHERE event_id = {$event_id};";
             $list = $wpdb->get_results($tags_query, "ARRAY_A");
 
             if ($wpdb->last_error) {
@@ -251,7 +252,7 @@ class Events extends WP_REST_Controller
 
             $response["tags"] = $list;
 
-            $seminars_query = "SELECT * FROM `{$this->prefix}seminars` WHERE event_id = {$request["id"]};";
+            $seminars_query = "SELECT * FROM `{$this->prefix}seminars` WHERE event_id = {$event_id};";
             $list = $wpdb->get_results($seminars_query, "ARRAY_A");
 
             if ($wpdb->last_error) {

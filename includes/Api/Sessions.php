@@ -77,7 +77,8 @@ class Sessions extends WP_REST_Controller
         global $wpdb;
         $response = NULL;
         if ($request["event_id"]) {
-            $query = "SELECT * FROM `{$this->prefix}sessions` WHERE event_id = {$request["event_id"]}";
+            $event_id = intval($request["event_id"]);
+            $query = "SELECT * FROM `{$this->prefix}sessions` WHERE event_id = {$event_id}";
             $response = $wpdb->get_results($query, "ARRAY_A");
 
             foreach ($response as &$session) {

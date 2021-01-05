@@ -96,7 +96,8 @@ class Registrations extends WP_REST_Controller
         global $wpdb;
         $response = [];
         if ($request["event_id"]) {
-            $query = "SELECT id FROM `{$this->prefix}registrations` WHERE event_id = {$request["event_id"]}";
+            $event_id = intval($request["event_id"]);
+            $query = "SELECT id FROM `{$this->prefix}registrations` WHERE event_id = {$event_id}";
             $registration_ids = $wpdb->get_results($query, "ARRAY_A");
             foreach ($registration_ids as $registration_id) {
                 array_push($response, $this->get_registration_with_lookups($registration_id["id"]));
@@ -202,7 +203,7 @@ class Registrations extends WP_REST_Controller
 
         $parameters = $request->get_params();
         if ($parameters["first_name"] && $parameters["surname"]) {
-            $registration_id = $request["id"];
+            $registration_id = intval($request["id"]);
             $wpdb->update("{$this->prefix}registrations", array(
                 'first_name' => $parameters["first_name"],
                 'surname' => $parameters["surname"],
@@ -280,7 +281,8 @@ class Registrations extends WP_REST_Controller
         if (intval($parameters["number_one"]) + intval($parameters["number_two"]) != intval($parameters["result"])) {
             return rest_ensure_response(array("error" => "Bitte gib die korrekte Summe an, um zu bestätigen, dass du kein Roboter bist."));
         }
-        $event_query = "SELECT * FROM `{$this->prefix}events` WHERE id = {$parameters["event_id"]};";
+        $event_id = intval($parameters["event_id"]);
+        $event_query = "SELECT * FROM `{$this->prefix}events` WHERE id = {$event_id};";
         $list = $wpdb->get_results($event_query, "ARRAY_A");
         if (count($list) < 1) {
             return rest_ensure_response(array("error" => "Die Anmeldung konnte keinem Event zugeordnet werden."));
@@ -320,7 +322,9 @@ class Registrations extends WP_REST_Controller
 
         $values = "";
         foreach ($seminars as $seminar) {
-            $query = "SELECT id FROM `{$this->prefix}sessions_to_seminars` WHERE session_id = {$seminar["session_id"]} AND seminar_id = {$seminar["seminar_id"]}";
+            $session_id = intval($seminar["session_id"]);
+            $seminar_id = intval($seminar["seminar_id"]);
+            $query = "SELECT id FROM `{$this->prefix}sessions_to_seminars` WHERE session_id = {$session_id} AND seminar_id = {$seminar_id}";
             $session_to_seminar_id = $wpdb->get_results($query, "ARRAY_A")[0];
 
             $values .= "($registration_id, {$session_to_seminar_id['id']}),";
@@ -343,7 +347,7 @@ class Registrations extends WP_REST_Controller
     {
         global $wpdb;
         $response = NULL;
-
+        $registration_id = intval($registration_id);
         $event_query = "SELECT * FROM `{$this->prefix}registrations` WHERE id = {$registration_id};";
         $list = $wpdb->get_results($event_query, "ARRAY_A");
 

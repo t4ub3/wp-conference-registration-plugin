@@ -191,7 +191,8 @@ class Speakers extends WP_REST_Controller {
         $response = NULL;
 
         if ($request["id"]) {
-            $event_query = "SELECT * FROM `{$this->prefix}speakers` WHERE id = {$request["id"]};";
+            $speaker_id = intval($request["id"]);
+            $event_query = "SELECT * FROM `{$this->prefix}speakers` WHERE id = {$speaker_id};";
             $list = $wpdb->get_results($event_query, "ARRAY_A");
     
             if ($wpdb->last_error) {
