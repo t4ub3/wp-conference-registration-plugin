@@ -23,7 +23,7 @@ export async function getSeminars(event_id) {
     });
 
     return untypedResult.map(seminar => ({
-        ...seminar, id: parseInt(seminar.id), event_id: parseInt(seminar.event_id)
+        ...seminar, id: parseInt(seminar.id), event_id: parseInt(seminar.event_id), slot_max: parseInt(seminar.slot_max)
     }))
 }
 

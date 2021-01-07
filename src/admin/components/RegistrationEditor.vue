@@ -136,9 +136,11 @@ export default {
       }
       result.forEach((registration) => {
         registration.seminars.forEach((seminar) => {
-          registration[`session_${seminar.session_id}`] = this.seminar_map[
-            seminar.seminar_id
-          ];
+          if (seminar) {
+            registration[`session_${seminar.session_id}`] = this.seminar_map[
+              seminar.seminar_id
+            ];
+          }
         });
         const additionalParams = parseJSONStringObject(
           registration.additional_params

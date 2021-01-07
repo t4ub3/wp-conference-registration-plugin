@@ -6,9 +6,30 @@
       </div>
       <div>
         <h4 class="crep-seminar__name">{{ seminar.name }}</h4>
-        <small class="crep-seminar__sessions">{{
-          getSessions(seminar.session_ids)
-        }}</small>
+        <small class="crep-seminar__sessions">
+          <template v-for="(session_id, index) in seminar.session_ids">
+            <span :key="`${seminar.id}_${session_id}`">
+              <template
+                v-if="
+                  seminar.slot_max <=
+                  seminar.registrations[parseInt(session_id)]
+                "
+              >
+                <span class="crep-seminar__session--full"
+                  ><span class="crep-seminar__session-name">
+                    {{ session_map[session_id] }}
+                  </span></span
+                ><span class="crep-seminar__warning">&nbsp;(ausgebucht)</span>
+              </template>
+              <template v-else>
+                {{ session_map[session_id] }}
+              </template>
+              <template v-if="index < seminar.session_ids.length - 1">
+                &nbsp;<span class="crep-seminar__pipe">|</span>&nbsp;
+              </template>
+            </span>
+          </template>
+        </small>
         <p class="crep-seminar__description">{{ seminar.description }}</p>
         <small class="crep-seminar__speakers">{{
           getSpeakers(seminar.speaker_ids)
@@ -50,7 +71,7 @@ export default {
   async created() {
     this.event = await getEvent(this.eventId);
     this.seminars = await getSeminars(this.eventId);
-    this.seminars.sort( this.compareSeminarByNumber );
+    this.seminars.sort(this.compareSeminarByNumber);
     this.event.sessions.forEach((session) => {
       this.session_map[session.id] = session.name;
     });
@@ -62,13 +83,6 @@ export default {
     });
   },
   methods: {
-    getSessions(session_ids) {
-      let sessions = "";
-      session_ids.forEach((session_id) => {
-        sessions += `${this.session_map[session_id]} | `;
-      });
-      return sessions.slice(0, -3);
-    },
     getSpeakers(speaker_ids) {
       let speakers = "";
       speaker_ids.forEach((speaker_id) => {
@@ -122,6 +136,19 @@ export default {
 }
 .crep-seminar__sessions {
   text-align: right;
+}
+.crep-seminar__session--full {
+  text-decoration: line-through;
+  color: #7a7171;
+}
+.crep-seminar__session-name {
+  color: #6bac2e;
+}
+.crep-seminar__warning {
+  color: #7a7171;
+}
+.crep-seminar__pipe {
+  font-size: medium;
 }
 .crep-seminar__tags {
   padding: 0;

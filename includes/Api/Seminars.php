@@ -221,6 +221,7 @@ class Seminars extends WP_REST_Controller
             }
 
             $seminar_ids = implode(',', array_map('intval', array($seminar_id)));
+            // FIXME: this is evil for sessions - registrations!!
             $this->delete_seminar_lookups($seminar_ids);
 
             if ($wpdb->last_error) {
