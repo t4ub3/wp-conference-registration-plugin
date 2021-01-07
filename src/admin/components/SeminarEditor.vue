@@ -38,8 +38,15 @@
       </template>
       <template slot="sessions" slot-scope="data">
         <ul class="seminar-editor__list">
-          <li v-for="session in data.row.sessions" :key="session">
-            {{ session }}
+          <li v-for="session in data.row.sessions" :key="session.id">
+            {{ session.name }}
+          </li>
+        </ul>
+      </template>
+      <template slot="registrations" slot-scope="data">
+        <ul class="seminar-editor__list">
+          <li v-for="session in data.row.sessions" :key="session.id">
+            {{ data.row.registrations[session.id] }}
           </li>
         </ul>
       </template>
@@ -123,8 +130,10 @@ export default {
           sortable: true,
         },
         sessions: {
-          label: "Sessions",
-          sortable: true,
+          label: "Sessions"
+        },
+        registrations: {
+          label: "Anmeldungen"
         },
         slot_max: {
           label: "max. Teilnehmerzahl",
@@ -177,7 +186,7 @@ export default {
       this.seminars = result.map((seminar) => ({
         ...seminar,
         description: truncate(seminar.description, 100),
-        sessions: seminar.session_ids.map((id) => this.session_map[id]),
+        sessions: seminar.session_ids.map((id) => ({"name": this.session_map[id], "id": id})),
         tags: seminar.tag_ids.map((id) => this.tag_map[id]),
         speakers: seminar.speaker_ids.map((id) => this.speaker_map[id]),
       }));
