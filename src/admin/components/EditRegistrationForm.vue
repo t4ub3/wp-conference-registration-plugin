@@ -73,7 +73,7 @@
 </template>
 
 <script>
-import { getRegistration, getEvent } from "../utils/api-services";
+import { getRegistration, getEvent, getSeminars } from "../utils/api-services";
 import { parseJSONStringArray, parseJSONStringObject } from "../utils/helpers";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
@@ -110,6 +110,7 @@ export default {
       seminar_map: {},
       seminarSelections: [],
       additionalParamFields: [],
+      seminars: []  
     };
   },
   async created() {
@@ -126,8 +127,10 @@ export default {
     }
 
     this.event = await getEvent(this.eventId);
-    this.event.seminars.forEach((seminar) => {
-      this.seminar_map[seminar.id] = seminar.name;
+    this.seminars = await getSeminars(this.eventId);
+
+    this.seminars.forEach((seminar) => {
+      this.seminar_map[seminar.id] = seminar;
     });
     this.event.sessions.forEach((session) => {
       const seminarSelection = {
@@ -139,7 +142,8 @@ export default {
       session.seminar_ids.forEach((seminarId) => {
         seminarSelection.options.push({
           code: seminarId,
-          name: this.seminar_map[seminarId],
+          name: this.seminar_map[seminarId].name,
+          $isDisabled: this.seminar_map[seminarId].slot_max <= this.seminar_map[seminarId].registrations[session.id]
         });
       });
 
@@ -148,7 +152,7 @@ export default {
           if (seminarPreloaded.session_id === session.id) {
             seminarSelection.value = {
               code: seminarPreloaded.seminar_id,
-              name: this.seminar_map[seminarPreloaded.seminar_id],
+              name: this.seminar_map[seminarPreloaded.seminar_id].name,
             };
           }
         });

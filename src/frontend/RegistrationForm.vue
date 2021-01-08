@@ -118,7 +118,7 @@
 </template>
 
 <script>
-import { getEvent, createRegistration } from "./utils/api-services";
+import { getEvent, createRegistration, getSeminars } from "./utils/api-services";
 import { parseJSONStringArray, getEquationData } from "./utils/helpers";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
@@ -160,8 +160,10 @@ export default {
   },
   async created() {
     this.event = await getEvent(this.eventId);
-    this.event.seminars.forEach((seminar) => {
-      this.seminar_map[seminar.id] = seminar.name;
+    this.seminars = await getSeminars(this.eventId);
+
+    this.seminars.forEach((seminar) => {
+      this.seminar_map[seminar.id] = seminar;
     });
 
     this.event.sessions.forEach((session) => {
@@ -174,7 +176,8 @@ export default {
       session.seminar_ids.forEach((seminarId) => {
         seminarSelection.options.push({
           code: seminarId,
-          name: this.seminar_map[seminarId],
+          name: this.seminar_map[seminarId].name,
+          $isDisabled: this.seminar_map[seminarId].slot_max <= this.seminar_map[seminarId].registrations[session.id]
         });
       });
       this.seminarSelections.push(seminarSelection);
