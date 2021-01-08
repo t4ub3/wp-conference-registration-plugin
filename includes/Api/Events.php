@@ -105,8 +105,40 @@ class Events extends WP_REST_Controller
         $parameters = $request->get_params();
         if ($parameters["ids"]) {
             $ids = implode(',', array_map('intval', $parameters["ids"]));
+
+            $seminars_query = "SELECT id FROM `{$this->prefix}seminars` WHERE event_id IN($ids)";
+            $seminar_list = $wpdb->get_results($seminars_query, "ARRAY_A");
+            $seminar_ids = array();
+            
+            foreach($seminar_list as $seminar_row) {
+                array_push($seminar_ids, $seminar_row["id"]);
+            }
+
+            if (sizeof($seminar_ids) > 0) {
+                $seminar_ids = implode(',', $seminar_ids);
+                $wpdb->query("DELETE `{$this->prefix}seminars`, 
+                                 `{$this->prefix}tags_to_seminars`, 
+                                 `{$this->prefix}sessions_to_seminars`, 
+                                 `{$this->prefix}speakers_to_seminars`, 
+                                 `{$this->prefix}registrations_to_seminar_in_session`
+                         FROM `{$this->prefix}seminars` 
+                         INNER JOIN `{$this->prefix}tags_to_seminars`
+                         INNER JOIN `{$this->prefix}sessions_to_seminars`
+                         INNER JOIN `{$this->prefix}speakers_to_seminars`
+                         INNER JOIN `{$this->prefix}registrations_to_seminar_in_session`
+                         WHERE {$this->prefix}seminars.id IN ($seminar_ids) AND
+                               {$this->prefix}tags_to_seminars.seminar_id IN ($seminar_ids) AND
+                               {$this->prefix}sessions_to_seminars.seminar_id IN ($seminar_ids) AND
+                               {$this->prefix}speakers_to_seminars.seminar_id IN ($seminar_ids) AND
+                               {$this->prefix}registrations_to_seminar_in_session.seminar_id IN ($seminar_ids)");
+            } 
+
+            $wpdb->query("DELETE FROM `{$this->prefix}tags` WHERE event_id IN($ids);");
+            $wpdb->query("DELETE FROM `{$this->prefix}sessions` WHERE event_id IN($ids);");
+            $wpdb->query("DELETE FROM `{$this->prefix}registrations` WHERE event_id IN($ids);");
+
             $count = $wpdb->query("DELETE FROM `{$this->prefix}events` WHERE id IN($ids)");
-            // TODO: delete tags, sessions, seminars, registrations
+
             if ($count <= 0) {
                 $response = array("error" => "Fehler beim Löschen - keine Events gelöscht.");
             } else {

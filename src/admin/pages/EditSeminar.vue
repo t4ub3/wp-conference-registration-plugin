@@ -29,6 +29,7 @@ export default {
       const result = await updateSeminar(seminar);
       if (result.error) {
         alert(result.error);
+        this.$router.go();
       } else {
         alert(`Seminar ${seminar.name} wurde aktualisiert!`);
         this.$router.push({path: `/${this.eventId}/edit-event` });

@@ -324,15 +324,12 @@ class Registrations extends WP_REST_Controller
         foreach ($seminars as $seminar) {
             $session_id = intval($seminar["session_id"]);
             $seminar_id = intval($seminar["seminar_id"]);
-            $query = "SELECT id FROM `{$this->prefix}sessions_to_seminars` WHERE session_id = {$session_id} AND seminar_id = {$seminar_id}";
-            $session_to_seminar_id = $wpdb->get_results($query, "ARRAY_A")[0];
-
-            $values .= "($registration_id, {$session_to_seminar_id['id']}),";
+            $values .= "($registration_id, $session_id, $seminar_id),";
         }
         $values = substr($values, 0, -1);
 
         $wpdb->query("INSERT INTO {$this->prefix}registrations_to_seminar_in_session
-            (`registration_id`, `session_to_seminar_id`)
+            (`registration_id`, `session_id`, `seminar_id`)
             VALUES
             $values");
     }
@@ -357,7 +354,7 @@ class Registrations extends WP_REST_Controller
         }
         $response = $list[0];
 
-        $registration_seminars_query = "SELECT session_to_seminar_id FROM `{$this->prefix}registrations_to_seminar_in_session` WHERE registration_id = {$registration_id};";
+        $registration_seminars_query = "SELECT session_id, seminar_id FROM `{$this->prefix}registrations_to_seminar_in_session` WHERE registration_id = {$registration_id};";
         $registration_seminars_ids = $wpdb->get_results($registration_seminars_query, "ARRAY_A");
 
         if ($wpdb->last_error) {
@@ -365,19 +362,7 @@ class Registrations extends WP_REST_Controller
             return $response;
         }
 
-        $response["seminars"] = array();
-
-        foreach ($registration_seminars_ids as $registration_seminars_id) {
-            $session_to_seminar_id = $registration_seminars_id["session_to_seminar_id"];
-            $seminar_sessions_query = "SELECT session_id, seminar_id FROM `{$this->prefix}sessions_to_seminars` WHERE id = {$session_to_seminar_id};";
-            $list_session_to_seminar_ids = $wpdb->get_results($seminar_sessions_query, "ARRAY_A");
-            array_push($response["seminars"], $list_session_to_seminar_ids[0]);
-        }
-
-        if ($wpdb->last_error) {
-            $response = array("error" => $wpdb->last_error);
-            return $response;
-        }
+        $response["seminars"] = $registration_seminars_ids;
 
         return $response;
     }

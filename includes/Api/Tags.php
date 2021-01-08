@@ -105,6 +105,7 @@ class Tags extends WP_REST_Controller {
             if ($count <= 0) {
                 $response = array("error" => "Fehler beim Löschen - keine Schlagwörter gelöscht.");
             } else {
+                $wpdb->query( "DELETE FROM `{$this->prefix}tags_to_seminars` WHERE tag_id IN($ids)" );
                 $response = array("success" => "$count Schlagwörter gelöscht!");
             }
         } else {

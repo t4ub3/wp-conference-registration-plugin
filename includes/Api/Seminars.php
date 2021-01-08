@@ -115,6 +115,13 @@ class Seminars extends WP_REST_Controller
         $parameters = $request->get_params();
         if ($parameters["ids"]) {
             $ids = implode(',', array_map('intval', $parameters["ids"]));
+            $count = $wpdb->query("SELECT id FROM `{$this->prefix}registrations_to_seminar_in_session` WHERE seminar_id IN($ids)");
+
+            if ($count > 0) {
+                $response = array("error" => "Fehler beim Löschen - mindestens eines der zu löschenden Seminare hat Anmeldungen. Bitte zuerst die Anmeldungen löschen / ändern.");
+                return rest_ensure_response($response);
+            }
+
             $count = $wpdb->query("DELETE FROM `{$this->prefix}seminars` WHERE id IN($ids)");
 
             if ($count <= 0) {
@@ -221,15 +228,9 @@ class Seminars extends WP_REST_Controller
             }
 
             $seminar_ids = implode(',', array_map('intval', array($seminar_id)));
-            // FIXME: this is evil for sessions - registrations!!
-            $this->delete_seminar_lookups($seminar_ids);
 
-            if ($wpdb->last_error) {
-                $response = array("error" => $wpdb->last_error);
-                return rest_ensure_response($response);
-            }
-
-            $this->add_seminar_lookups("session", $seminar_id, $parameters["session_ids"]);
+            $wpdb->query("DELETE FROM `{$this->prefix}speakers_to_seminars` WHERE seminar_id IN($seminar_ids)");
+            $wpdb->query("DELETE FROM `{$this->prefix}tags_to_seminars` WHERE seminar_id IN($seminar_ids)");
 
             if ($wpdb->last_error) {
                 $response = array("error" => $wpdb->last_error);
@@ -250,6 +251,13 @@ class Seminars extends WP_REST_Controller
                     $response = array("error" => $wpdb->last_error);
                     return rest_ensure_response($response);
                 }
+            }
+
+            $error_msg = $this->add_seminar_session_lookups($seminar_id, $parameters["session_ids"]);
+
+            if ($error_msg || $wpdb->last_error) {
+                $response = array("error" => $error_msg ?: $wpdb->last_error);
+                return rest_ensure_response($response);
             }
 
             $response = array("success" => "Aktualisiertes Seminar gespeichert!");
@@ -315,6 +323,50 @@ class Seminars extends WP_REST_Controller
             $values");
     }
 
+    public function add_seminar_session_lookups($seminar_id, $session_ids)
+    {
+        global $wpdb;
+
+        $seminar_id = intval($seminar_id);
+
+        $sessions_query = "SELECT session_id FROM `{$this->prefix}sessions_to_seminars` WHERE seminar_id = {$seminar_id};";
+        $existing_lookups = $wpdb->get_results($sessions_query, "ARRAY_A");
+        $unchanged_sessions = array();
+
+        foreach ($existing_lookups as $lookup) {
+            $session_id = $lookup["session_id"];
+
+            if (!in_array($session_id, $session_ids)) {
+                $count = $wpdb->query("SELECT id FROM `{$this->prefix}registrations_to_seminar_in_session` WHERE seminar_id = $seminar_id AND session_id = $session_id");
+                if ($count > 0) {
+                    return "Die Session - Seminar - Zuordnung kann nicht geändert werden, weil es mindestens eine Anmeldung für diese Kombination gibt. " .
+                           "Bitte zuerst die Anmeldungen löschen / ändern.";
+                }
+                $wpdb->query("DELETE FROM `{$this->prefix}sessions_to_seminars` WHERE seminar_id = $seminar_id AND session_id = $session_id");
+            } else {
+                array_push($unchanged_sessions, $session_id);
+            }
+        }
+
+        $values = "";
+
+        foreach ($session_ids as $session_id) {
+            if (!in_array($session_id, $unchanged_sessions)) {
+                $session_id = intval($session_id);
+                $values .= "($session_id, $seminar_id),";
+            }
+        }
+
+        if ($values) {
+            $values = substr($values, 0, -1);
+
+            $wpdb->query("INSERT INTO {$this->prefix}sessions_to_seminars
+                (`session_id`, `seminar_id`)
+                VALUES
+                $values");
+        }
+    }
+
     public function delete_seminar_lookups($seminar_ids)
     {
         global $wpdb;
@@ -342,7 +394,7 @@ class Seminars extends WP_REST_Controller
             $response["slot_max"] = $default_slot_max;
         }
 
-        $sessions_query = "SELECT session_id FROM `{$this->prefix}sessions_to_seminars` WHERE seminar_id = {$seminar_id};";
+        $sessions_query = "SELECT session_id FROM `{$this->prefix}sessions_to_seminars` WHERE seminar_id = {$seminar_id} ORDER BY session_id ASC;";
         $list = $wpdb->get_results($sessions_query, "ARRAY_A");
 
         if ($wpdb->last_error) {
@@ -357,13 +409,12 @@ class Seminars extends WP_REST_Controller
             $response["registrations"][$session_row["session_id"]] = 0;
         }
 
-        $registrations_query = "SELECT sessions_lookup.session_id as session_id, reg_lookup.id as registration_id 
+        $registrations_query = "SELECT reg_lookup.session_id as session_id, reg_lookup.id as registration_id 
                                 FROM wp_crep_seminars as seminars 
-                                LEFT JOIN wp_crep_sessions_to_seminars as sessions_lookup ON seminars.id = sessions_lookup.seminar_id 
-                                LEFT JOIN wp_crep_registrations_to_seminar_in_session as reg_lookup ON sessions_lookup.id = reg_lookup.session_to_seminar_id 
+                                LEFT JOIN wp_crep_registrations_to_seminar_in_session as reg_lookup ON seminars.id = reg_lookup.seminar_id
                                 WHERE seminars.id = $seminar_id;";
         $registrations_list = $wpdb->get_results($registrations_query, "ARRAY_A");
-        foreach($registrations_list as $registrations_row) {
+        foreach ($registrations_list as $registrations_row) {
             if (isset($registrations_row["registration_id"])) {
                 $response["registrations"][$registrations_row["session_id"]] += 1;
             }
@@ -393,7 +444,7 @@ class Seminars extends WP_REST_Controller
             array_push($response["tag_ids"], $tag_row["tag_id"]);
         }
 
-        
+
 
         return $response;
     }

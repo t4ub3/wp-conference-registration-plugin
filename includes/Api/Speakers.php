@@ -103,6 +103,7 @@ class Speakers extends WP_REST_Controller {
             if ($count <= 0) {
                 $response = array("error" => "Fehler beim Löschen - keine Referenten gelöscht.");
             } else {
+                $wpdb->query( "DELETE FROM `{$this->prefix}speakers_to_seminars` WHERE speaker_id IN($ids)" );
                 $response = array("success" => "$count Referenten gelöscht!");
             }
         } else {

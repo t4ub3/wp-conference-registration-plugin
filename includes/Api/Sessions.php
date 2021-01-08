@@ -107,6 +107,14 @@ class Sessions extends WP_REST_Controller
         $parameters = $request->get_params();
         if ($parameters["ids"]) {
             $ids = implode(',', array_map('intval', $parameters["ids"]));
+
+            $count = $wpdb->query("SELECT id FROM `{$this->prefix}sessions_to_seminars` WHERE session_id IN($ids)");
+
+            if ($count > 0) {
+                $response = array("error" => "Fehler beim Löschen - mindestens eine der zu löschenden Sessions hat Seminare. Bitte zuerst die Seminare löschen / ändern.");
+                return rest_ensure_response($response);
+            }
+
             $count = $wpdb->query("DELETE FROM `{$this->prefix}sessions` WHERE id IN($ids)");
             if ($count <= 0) {
                 $response = array("error" => "Fehler beim Löschen - keine Session gelöscht.");

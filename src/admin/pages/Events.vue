@@ -97,7 +97,7 @@ export default {
 
     async onActionClick(action, row) {
       if ("delete" === action) {
-        if (confirm("Event " + row.name + " wirklich löschen?")) {
+        if (confirm("Event " + row.name + " wirklich löschen? Dabei werden ALLE zugehörigen Daten (Seminar, Anmeldungen usw.) gelöscht!")) {
           const result = await deleteEvents([row.id]);
           if (result.error) {
             alert(result.error);
@@ -113,7 +113,7 @@ export default {
 
     async onBulkActionClick(action, rowIds) {
       if ("delete" === action) {
-        if (confirm("Gewählte Events wirklich löschen?")) {
+        if (confirm("Gewählte Events wirklich löschen? Dabei werden ALLE zugehörigen Daten (Seminar, Anmeldungen usw.) gelöscht!")) {
           const result = await deleteEvents(rowIds);
           if (result.error) {
             alert(result.error);

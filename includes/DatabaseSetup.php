@@ -71,7 +71,8 @@ function crep_setup_tables() {
 
     create_crep_table("registrations_to_seminar_in_session", "
         registration_id int(9) NOT NULL,
-        session_to_seminar_id int(9) NOT NULL,
+        session_id int(9) NOT NULL,
+        seminar_id int(9) NOT NULL,
     ");
 
     create_crep_table("tags_to_seminars", "
