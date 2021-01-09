@@ -181,7 +181,7 @@ class Registrations extends WP_REST_Controller
                 }
             }
 
-            $response = array("success" => "Neue Anmeldung gespeichert!");
+            $response = array("success" => "Neue Anmeldung gespeichert!", "id" => $registration_id);
         } else {
             $response = array("error" => "Bitte geben Sie mindestens den Namen, Vornamen und das Event an!");
         }
@@ -287,8 +287,9 @@ class Registrations extends WP_REST_Controller
         if (count($list) < 1) {
             return rest_ensure_response(array("error" => "Die Anmeldung konnte keinem Event zugeordnet werden."));
         }
-        if (isset($list[0]["additional_params"]) && $list[0]["additional_params"] != "") {
-            $additional_fields = json_decode($list[0]["additional_params"]);
+        $event = $list[0];
+        if (isset($event["additional_params"]) && $event["additional_params"] != "") {
+            $additional_fields = json_decode($event["additional_params"]);
             $additional_fields_params = json_decode($parameters["additional_params"], true);
             foreach ($additional_fields as $field) {
                 if (isset($field->required) && $field->required == true && !$additional_fields_params[$field->code]) {
@@ -297,8 +298,46 @@ class Registrations extends WP_REST_Controller
             }
         }
 
-        // TODO: send mails
-        return $this->create_registration($request);
+        $response = $this->create_registration($request);
+
+        if (isset($response->data["success"])) {
+            $mail = "Liebe(r) {$parameters["first_name"]},\n du hast dich für {$event["name"]} angemeldet.\n\n";
+
+            if ($parameters["seminars"] && sizeof($parameters["seminars"]) > 0) {
+                $mail .= "Folgende Seminare hast du ausgewählt:\n";
+                foreach ($parameters["seminars"] as $seminar) {
+                    $session_id = intval($seminar["session_id"]);
+                    $seminar_id = intval($seminar["seminar_id"]);
+                    $seminar_session_query = "SELECT seminars.name as seminar_name, sessions.name as session_name 
+                        FROM {$this->prefix}sessions_to_seminars as lookup
+                        LEFT JOIN {$this->prefix}seminars as seminars ON seminars.id = lookup.seminar_id
+                        LEFT JOIN {$this->prefix}sessions as sessions ON sessions.id = lookup.session_id
+                        WHERE lookup.seminar_id = $seminar_id AND lookup.session_id = $session_id;";
+                    $seminar_session = $wpdb->get_results($seminar_session_query, "ARRAY_A");
+                    if (sizeof($seminar_session) > 0) {
+                        $mail .= " - {$seminar_session[0]["session_name"]}: {$seminar_session[0]["seminar_name"]}\n";
+                    }
+                }
+                $mail .= "\n\n";
+            }
+
+            $mail .= "Deine Anmeldung muss noch von uns bestätigt werden " .
+                    "- sobald das geschehen ist, bekommst du eine Bestätigung per E-Mail.\n\n" .
+                    "Danke für deine Anmeldung - Wir freuen uns auf dich!";
+            $domain = $_SERVER['HTTP_HOST'];
+            $headers = "From: {$event["name"]} <no-reply@{$domain}>";
+            wp_mail($parameters["contact_mail"], "Deine Anmeldung für {$event["name"]}", $mail, $headers);
+            
+            $admin_mail = "{$parameters["first_name"]} {$parameters["surname"]} hat sich für {$event["name"]} angemeldet.\n\n" . 
+            "Klicke auf folgenden Link, um die Anmeldung anzuschauen und ggf. zu bestätigen:\n";
+            $registration_id = $response->data["id"];
+            $url = get_bloginfo('wpurl');
+            $admin_mail .= "{$url}/wp-admin/admin.php?page=crep&confirm_registration={$registration_id}&event_id={$event["id"]}";
+                    
+            wp_mail($event["contact_mail"], "Neue Anmeldung für {$event["name"]}", $admin_mail, $headers);
+        }
+        
+        return $response;
     }
 
     /****************************************************************************************
