@@ -26,6 +26,7 @@
 import ListTable from "vue-wp-list-table";
 import "vue-wp-list-table/dist/vue-wp-list-table.css";
 import { deleteEvents, getEvents } from "../utils/api-services";
+import { getParameterByName } from '../utils/helpers';
 
 export default {
   name: "Events",
@@ -81,6 +82,12 @@ export default {
   },
 
   created() {
+    const registration_id = getParameterByName("confirm_registration");
+    const event_id = getParameterByName("event_id");
+    if (registration_id && event_id) {
+      this.$router.push({path: `/${event_id}/edit-registration/${registration_id}` });
+    }
+
     this.loadItems();
   },
 

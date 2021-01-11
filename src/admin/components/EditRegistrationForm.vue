@@ -52,7 +52,7 @@
           v-for="param in additionalParamFields"
           :key="param.code"
         >
-          <th scope="row">{{ param.name + (param.required ? '*' : '') }}</th>
+          <th scope="row">{{ param.name + (param.required ? "*" : "") }}</th>
           <td>
             <input
               type="text"
@@ -67,14 +67,28 @@
       <em>* = Pflichtfeld</em>
     </p>
     <button class="button button-primary" type="submit">
-      {{ buttonText }}
+      {{ isConfirmation ? "Anmeldung bestätigen" : buttonText }}
     </button>
+    <span id="delete-link">
+      <a class="delete" @click="deleteRegistration" href="#">
+        {{ deleteButtonText }}
+      </a>
+    </span>
   </form>
 </template>
 
 <script>
-import { getRegistration, getEvent, getSeminars } from "../utils/api-services";
-import { parseJSONStringArray, parseJSONStringObject } from "../utils/helpers";
+import {
+  getRegistration,
+  getEvent,
+  getSeminars,
+  deleteRegistrations,
+} from "../utils/api-services";
+import {
+  getParameterByName,
+  parseJSONStringArray,
+  parseJSONStringObject,
+} from "../utils/helpers";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
 
@@ -85,6 +99,10 @@ export default {
     buttonText: {
       type: String,
       default: "Speichern",
+    },
+    deleteButtonText: {
+      type: String,
+      default: "Löschen",
     },
     registrationId: {
       type: Number,
@@ -110,10 +128,12 @@ export default {
       seminar_map: {},
       seminarSelections: [],
       additionalParamFields: [],
-      seminars: []  
+      seminars: [],
+      isConfirmation: false,
     };
   },
   async created() {
+    this.isConfirmation = !!getParameterByName("confirm_registration");
     let registration = null;
 
     if (this.registrationId) {
@@ -143,7 +163,9 @@ export default {
         seminarSelection.options.push({
           code: seminarId,
           name: this.seminar_map[seminarId].name,
-          $isDisabled: this.seminar_map[seminarId].slot_max <= this.seminar_map[seminarId].registrations[session.id]
+          $isDisabled:
+            this.seminar_map[seminarId].slot_max <=
+            this.seminar_map[seminarId].registrations[session.id],
         });
       });
 
@@ -188,7 +210,31 @@ export default {
       this.newRegistration.additional_params = JSON.stringify(
         this.newRegistration.additional_params
       );
+      this.newRegistration.is_confirmation = this.isConfirmation;
       this.$emit("registration-submit", this.newRegistration);
+    },
+    async deleteRegistration(event) {
+      event.preventDefault();
+      if (this.registrationId) {
+        if (
+          confirm(
+            `Anmeldung für ${this.newRegistration.first_name} ${this.newRegistration.surname} wirklich löschen`
+          )
+        ) {
+          const result = await deleteRegistrations([this.registrationId]);
+          if (result.error) {
+            alert(result.error);
+            return;
+          } else {
+            alert(
+              `Anmeldung für ${this.newRegistration.first_name} ${this.newRegistration.surname} gelöscht!`
+            );
+          }
+        } else {
+          return;
+        }
+      }
+      this.$router.push({ path: `/${this.eventId}/edit-event` });
     },
   },
 };

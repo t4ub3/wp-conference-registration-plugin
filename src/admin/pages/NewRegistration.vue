@@ -3,6 +3,7 @@
     <h1>Neue Anmeldung erstellen</h1>
     <edit-registration-form
       button-text="Neue Anmeldung erstellen"
+      delete-button-text="Verwerfen"
       @registration-submit="createRegistration"
       :event-id="eventId"
     ></edit-registration-form>

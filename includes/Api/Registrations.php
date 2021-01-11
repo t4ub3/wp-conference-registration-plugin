@@ -234,6 +234,23 @@ class Registrations extends WP_REST_Controller
             }
 
             $response = array("success" => "Aktualisierte Anmeldung gespeichert!");
+
+            if ($parameters["is_confirmation"] && $parameters["contact_mail"] && 
+                rest_sanitize_boolean($parameters["is_confirmation"])) {
+                $event_query = "SELECT events.name FROM `{$this->prefix}registrations` as registrations
+                                LEFT JOIN `{$this->prefix}events` as events ON registrations.event_id = events.id 
+                                WHERE registrations.id = {$registration_id};";
+                $list = $wpdb->get_results($event_query, "ARRAY_A");
+                if (count($list) < 1) {
+                    return rest_ensure_response($response);
+                }
+                $event = $list[0];
+                $mail = "Liebe(r) {$parameters["first_name"]},\n\n";
+                $mail .= "Deine Anmeldung für {$event["name"]} wurde bestätigt!";
+                $domain = $_SERVER['HTTP_HOST'];
+                $headers = "From: {$event["name"]} <no-reply@{$domain}>";
+                wp_mail($parameters["contact_mail"], "Bestätigung deiner Anmeldung für {$event["name"]}", $mail, $headers);
+            }
         } else {
             $response = array("error" => "Bitte geben Sie mindestens den Namen und den Vornamen an!");
         }
@@ -301,7 +318,7 @@ class Registrations extends WP_REST_Controller
         $response = $this->create_registration($request);
 
         if (isset($response->data["success"])) {
-            $mail = "Liebe(r) {$parameters["first_name"]},\n du hast dich für {$event["name"]} angemeldet.\n\n";
+            $mail = "Liebe(r) {$parameters["first_name"]},\ndu hast dich für {$event["name"]} angemeldet.\n\n";
 
             if ($parameters["seminars"] && sizeof($parameters["seminars"]) > 0) {
                 $mail .= "Folgende Seminare hast du ausgewählt:\n";
