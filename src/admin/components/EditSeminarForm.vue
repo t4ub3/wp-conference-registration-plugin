@@ -19,7 +19,12 @@
       <tr class="form-field">
         <th scope="row">Name*</th>
         <td>
-          <input id="crep-name" v-model="newSeminar.name" required type="text" />
+          <input
+            id="crep-name"
+            v-model="newSeminar.name"
+            required
+            type="text"
+          />
         </td>
       </tr>
       <tr class="form-field">
@@ -51,13 +56,24 @@
             v-model="sessionsValue"
             tag-placeholder="Session nicht gefunden"
             placeholder="Suche nach einer Session"
-            selectLabel="Enter oder Anklicken zum Auswählen"
+            selectedLabel="Ausgewählt"
+            selectLabel="Auswählen"
+            deselectLabel="Entfernen"
             label="name"
             track-by="code"
             :options="sessionsOptions"
             :multiple="true"
             :taggable="true"
-          ></multiselect>
+          >
+            <template slot="noOptions">Keine Einträge.</template>
+            <template slot="noResults"
+              >Keine Einträge gefunden. Ändere deine Suche!</template
+            >
+            <template slot="maxElements"
+              >Entferne zunächst eine ausgewählte Option, um eine andere
+              auszuwählen.</template
+            ></multiselect
+          >
         </td>
       </tr>
       <tr class="form-field">
@@ -68,13 +84,24 @@
             v-model="speakersValue"
             tag-placeholder="Referent nicht gefunden"
             placeholder="Suche nach einem Referenten"
-            selectLabel="Enter oder Anklicken zum Auswählen"
+            selectedLabel="Ausgewählt"
+            selectLabel="Auswählen"
+            deselectLabel="Entfernen"
             label="name"
             track-by="code"
             :options="speakersOptions"
             :multiple="true"
             :taggable="true"
-          ></multiselect>
+          >
+            <template slot="noOptions">Keine Einträge.</template>
+            <template slot="noResults"
+              >Keine Einträge gefunden. Ändere deine Suche!</template
+            >
+            <template slot="maxElements"
+              >Entferne zunächst eine ausgewählte Option, um eine andere
+              auszuwählen.</template
+            ></multiselect
+          >
         </td>
       </tr>
       <tr class="form-field">
@@ -85,13 +112,24 @@
             v-model="tagsValue"
             tag-placeholder="Schlagwort nicht gefunden"
             placeholder="Suche nach einem Schlagwort"
-            selectLabel="Enter oder Anklicken zum Auswählen"
+            selectedLabel="Ausgewählt"
+            selectLabel="Auswählen"
+            deselectLabel="Entfernen"
             label="name"
             track-by="code"
             :options="tagsOptions"
             :multiple="true"
             :taggable="true"
-          ></multiselect>
+          >
+            <template slot="noOptions">Keine Einträge.</template>
+            <template slot="noResults"
+              >Keine Einträge gefunden. Ändere deine Suche!</template
+            >
+            <template slot="maxElements"
+              >Entferne zunächst eine ausgewählte Option, um eine andere
+              auszuwählen.</template
+            ></multiselect
+          >
         </td>
       </tr>
     </table>

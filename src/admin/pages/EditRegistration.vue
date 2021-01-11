@@ -26,7 +26,6 @@ export default {
   methods: {
     async updateRegistration(registration) {
       registration.id = this.id;
-      registration.confirmed = 1;
       const result = await updateRegistration(registration);
       if (result.error) {
         alert(result.error);

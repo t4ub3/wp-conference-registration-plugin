@@ -34,12 +34,21 @@
             class="edit-registration-form__fullwidth-field"
             v-model="session.value"
             placeholder="Suche nach einem Seminar"
-            selectLabel="Enter oder Anklicken zum Auswählen"
+            selectedLabel="Ausgewählt"
+            selectLabel="Auswählen"
+            deselectLabel="Entfernen"
             label="name"
             track-by="code"
             :options="session.options"
           >
             <template slot="noOptions">Keine Einträge.</template>
+            <template slot="noResults"
+              >Keine Einträge gefunden. Ändere deine Suche!</template
+            >
+            <template slot="maxElements"
+              >Entferne zunächst eine ausgewählte Option, um eine andere
+              auszuwählen.</template
+            >
           </multiselect>
         </td>
       </tr>
@@ -57,12 +66,25 @@
             <input
               type="text"
               :required="param.required"
-              v-model="newRegistration.additional_params[param.code]"
+              v-model="newRegistration.additional_params_object[param.code]"
             />
           </td>
         </tr>
       </table>
     </template>
+    <p v-if="newRegistration.confirmed === '0'">
+      <input
+        type="checkbox"
+        id="crep_confirmed"
+        v-model="confirmAndMail"
+      />
+      <label for="crep_confirmed"
+        ><strong
+          >Diese Anmeldung bestätigen (der Teilnehmer erhält eine
+          Bestätigungsmail)</strong
+        ></label
+      >
+    </p>
     <p>
       <em>* = Pflichtfeld</em>
     </p>
@@ -119,7 +141,9 @@ export default {
         surname: "",
         contact_mail: "",
         event_id: this.eventId,
-        additional_params: {},
+        additional_params_object: {},
+        confirmed: "1",
+        additional_params: "",
       },
       event: {
         sessions: [],
@@ -130,20 +154,23 @@ export default {
       additionalParamFields: [],
       seminars: [],
       isConfirmation: false,
+      confirmAndMail: true,
     };
   },
   async created() {
-    this.isConfirmation = !!getParameterByName("confirm_registration");
     let registration = null;
+    this.isConfirmation = !!getParameterByName("confirm_registration");
 
     if (this.registrationId) {
       registration = await getRegistration(this.$route.params.registration_id);
       this.newRegistration.first_name = registration.first_name;
       this.newRegistration.surname = registration.surname;
       this.newRegistration.contact_mail = registration.contact_mail;
-      this.newRegistration.additional_params = parseJSONStringObject(
+      this.newRegistration.additional_params = registration.additional_params;
+      this.newRegistration.additional_params_object = parseJSONStringObject(
         registration.additional_params
       );
+      this.newRegistration.confirmed = registration.confirmed;
     }
 
     this.event = await getEvent(this.eventId);
@@ -164,8 +191,9 @@ export default {
           code: seminarId,
           name: this.seminar_map[seminarId].name,
           $isDisabled:
+            this.seminar_map[seminarId].slot_max !== 0 &&
             this.seminar_map[seminarId].slot_max <=
-            this.seminar_map[seminarId].registrations[session.id],
+              this.seminar_map[seminarId].registrations[session.id],
         });
       });
 
@@ -187,11 +215,11 @@ export default {
     );
     this.additionalParamFields.forEach((param) => {
       if (
-        !Object.keys(this.newRegistration.additional_params).includes(
+        !Object.keys(this.newRegistration.additional_params_object).includes(
           param.code
         )
       ) {
-        this.newRegistration.additional_params[param.code] = "";
+        this.newRegistration.additional_params_object[param.code] = "";
       }
     });
   },
@@ -208,9 +236,10 @@ export default {
         }
       });
       this.newRegistration.additional_params = JSON.stringify(
-        this.newRegistration.additional_params
+        this.newRegistration.additional_params_object
       );
-      this.newRegistration.is_confirmation = this.isConfirmation;
+      this.newRegistration.is_confirmation = this.newRegistration.confirmed === "0" && this.confirmAndMail;
+      this.newRegistration.confirmed = this.confirmAndMail ? "1" : "0";
       this.$emit("registration-submit", this.newRegistration);
     },
     async deleteRegistration(event) {

@@ -54,12 +54,21 @@
           class="edit-registration-form__fullwidth-field"
           v-model="session.value"
           placeholder="Suche nach einem Seminar"
-          selectLabel="Enter oder Anklicken zum Auswählen"
+          selectedLabel="Ausgewählt"
+          selectLabel="Auswählen"
+          deselectLabel="Entfernen"
           label="name"
           track-by="code"
           :options="session.options"
         >
           <template slot="noOptions">Keine Einträge.</template>
+          <template slot="noResults"
+            >Keine Einträge gefunden. Ändere deine Suche!</template
+          >
+          <template slot="maxElements"
+            >Entferne zunächst eine ausgewählte Option, um eine andere
+            auszuwählen.</template
+          >
         </multiselect>
       </template>
     </fieldset>
@@ -118,7 +127,11 @@
 </template>
 
 <script>
-import { getEvent, createRegistration, getSeminars } from "./utils/api-services";
+import {
+  getEvent,
+  createRegistration,
+  getSeminars,
+} from "./utils/api-services";
 import { parseJSONStringArray, getEquationData } from "./utils/helpers";
 import Multiselect from "vue-multiselect";
 import "vue-multiselect/dist/vue-multiselect.min.css";
@@ -155,7 +168,7 @@ export default {
       seminarSelections: [],
       additionalParamFields: [],
       equation: getEquationData(),
-      requiredFields: ["Vorname", "Nachname", "E-Mail-Adresse"]
+      requiredFields: ["Vorname", "Nachname", "E-Mail-Adresse"],
     };
   },
   async created() {
@@ -177,7 +190,10 @@ export default {
         seminarSelection.options.push({
           code: seminarId,
           name: this.seminar_map[seminarId].name,
-          $isDisabled: this.seminar_map[seminarId].slot_max <= this.seminar_map[seminarId].registrations[session.id]
+          $isDisabled:
+            this.seminar_map[seminarId].slot_max !== 0 &&
+            this.seminar_map[seminarId].slot_max <=
+              this.seminar_map[seminarId].registrations[session.id],
         });
       });
       this.seminarSelections.push(seminarSelection);
@@ -202,17 +218,37 @@ export default {
   methods: {
     async submit(event) {
       event.preventDefault();
-      const empty_required_fields = this.additionalParamFields.filter(param => param.required && !this.newRegistration.additional_params_object[param.code]);
-      if (empty_required_fields.length || !this.newRegistration.first_name || !this.newRegistration.surname || !this.newRegistration.contact_mail) {
-        alert("Die Felder:\n\n" + this.requiredFields.join(', ') + "\n\nsind Pflichtfelder und müssen angegeben werden!");
+      const empty_required_fields = this.additionalParamFields.filter(
+        (param) =>
+          param.required &&
+          !this.newRegistration.additional_params_object[param.code]
+      );
+      if (
+        empty_required_fields.length ||
+        !this.newRegistration.first_name ||
+        !this.newRegistration.surname ||
+        !this.newRegistration.contact_mail
+      ) {
+        alert(
+          "Die Felder:\n\n" +
+            this.requiredFields.join(", ") +
+            "\n\nsind Pflichtfelder und müssen angegeben werden!"
+        );
         return;
       }
       if (!this.newRegistration.consent) {
-        alert("Bitte bestätige den Hinweis zum Datenschutz, um dich anzumelden!");
+        alert(
+          "Bitte bestätige den Hinweis zum Datenschutz, um dich anzumelden!"
+        );
         return;
       }
-      if (this.newRegistration.result === "" || parseInt(this.newRegistration.result) !== this.equation.sum) {
-        alert("Bitte gib die korrekte Summe an, um zu bestätigen, dass du kein Roboter bist.");
+      if (
+        this.newRegistration.result === "" ||
+        parseInt(this.newRegistration.result) !== this.equation.sum
+      ) {
+        alert(
+          "Bitte gib die korrekte Summe an, um zu bestätigen, dass du kein Roboter bist."
+        );
         return;
       }
       this.newRegistration.seminars = [];
@@ -234,7 +270,8 @@ export default {
       alert(
         result.success
           ? "Deine Anmeldung wurde versandt. Du erhälst bald eine Bestätigungsmail. Vielen Dank!"
-          : "Beim Senden ist ein Fehler aufgetreten:\n\n" + (result.error || "Unbekannter Fehler")
+          : "Beim Senden ist ein Fehler aufgetreten:\n\n" +
+              (result.error || "Unbekannter Fehler")
       );
       if (result.success) {
         window.location.href = this.redirectUrl;
