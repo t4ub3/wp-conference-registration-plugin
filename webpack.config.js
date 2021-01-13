@@ -99,7 +99,12 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        use: 'babel-loader',
+        use: {
+          loader: "babel-loader", 
+          options: {
+            presets: ["@babel/preset-env"]  //Preset used for env setup
+          },
+        },
         exclude: /node_modules/
       },
       {
