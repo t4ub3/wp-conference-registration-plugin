@@ -68,9 +68,10 @@
 <script>
 import {
   deleteSeminars,
+  getRegistrations,
   getSeminars,
-  getSpeakers,
 } from "../utils/api-services";
+import { exportRegistrations } from "../utils/helpers";
 import ListTable from "vue-wp-list-table";
 import "vue-wp-list-table/dist/vue-wp-list-table.css";
 import { truncate } from '../utils/helpers';
@@ -153,6 +154,10 @@ export default {
           key: "delete",
           label: "Löschen",
         },
+        {
+          key: "export",
+          label: "Exportieren"
+        }
       ],
       bulk_actions: [
         {
@@ -206,6 +211,12 @@ export default {
         }
       } else if ("edit" === action) {
         this.$router.push({ path: `/${this.event_id}/edit-seminar/${row.id}` });
+      } else if ("export" === action) {
+        let seminars = {[row.id] : {"name":row.name, "sessions": row.sessions.reduce((sessionsObj, session) => {
+          sessionsObj[session.id] = {"name": session.name, "registrations": []};
+          return sessionsObj;
+        }, {})}};
+        await exportRegistrations(seminars, this.event_id)
       }
     },
 
