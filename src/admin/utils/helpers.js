@@ -51,9 +51,9 @@ export function getParameterByName(name, url = window.location.href) {
 export async function exportRegistrationsBySeminars(seminars, event) {
   let registrations = await getRegistrations(event.id);
   let additionalParams = parseJSONStringArray(event.additional_params);
-  let csvHead = "Vorname;Nachname;E-Mail;Bestätigt;Anmeldedatum";
+  let csvHead = "Vorname;Nachname,E-Mail,Bestätigt,Anmeldedatum";
   additionalParams.forEach(param => {
-    csvHead += ";" + param.name;
+    csvHead += "," + param.name;
   });
   registrations.forEach(registration => {
     registration.additionalParams = parseJSONStringObject(registration.additional_params);
@@ -78,7 +78,7 @@ export async function exportRegistrationsBySeminars(seminars, event) {
     Object.values(seminar.sessions).forEach(session => {
       csvContent += session.name + "\n\n";
       csvContent += csvHead + "\n";
-      csvContent += session.registrations.map(registration => registration.join(";")).join("\n");
+      csvContent += session.registrations.map(registration => registration.map(value => value ? `"${value}"` : "-").join(",")).join("\n");
       csvContent += "\n\n\n"
     });
     createCsv(csvContent, seminar.name);
@@ -87,13 +87,13 @@ export async function exportRegistrationsBySeminars(seminars, event) {
 
 export function exportAllRegistrations(registrations, event) {
   let csvContent = "data:text/csv;charset=utf-8,";
-  csvContent += "Vorname;Nachname;E-Mail;Bestätigt;Anmeldedatum";
+  csvContent += "Vorname,Nachname,E-Mail,Bestätigt,Anmeldedatum";
   event.sessions.forEach(session => {
-    csvContent += ";" + session.name;
+    csvContent += "," + session.name;
   });
   let additionalParams = parseJSONStringArray(event.additional_params);
   additionalParams.forEach(param => {
-    csvContent += ";" + param.name;
+    csvContent += "," + param.name;
   });
   csvContent += "\n";
 
@@ -107,7 +107,7 @@ export function exportAllRegistrations(registrations, event) {
                     ... event.sessions.map(session => registration["session_" + session.id] || "-"),
                     ...additionalParams.map(param => registration.additionalParams[param.code])
                   ];
-    csvContent += values.join(";") + "\n";
+    csvContent += values.map(value => value ? `"${value}"` : "-").join(",") + "\n";
   });
   createCsv(csvContent, event.name);
 }
@@ -116,6 +116,6 @@ function createCsv(content, filename) {
   const data = encodeURI(content);
   const link = document.createElement("a");
   link.setAttribute("href", data);
-  link.setAttribute("download", filename.replaceAll(" ", "_") + ".csv");
+  link.setAttribute("download", filename.replaceAll(" ", "_").replace(/\W/g, "") + ".csv");
   link.click();
 }
