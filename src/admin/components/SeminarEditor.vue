@@ -71,7 +71,7 @@ import {
   getRegistrations,
   getSeminars,
 } from "../utils/api-services";
-import { exportRegistrations } from "../utils/helpers";
+import { exportRegistrationsBySeminars } from "../utils/helpers";
 import ListTable from "vue-wp-list-table";
 import "vue-wp-list-table/dist/vue-wp-list-table.css";
 import { truncate } from '../utils/helpers';
@@ -217,7 +217,7 @@ export default {
           sessionsObj[session.id] = {"name": session.name, "registrations": []};
           return sessionsObj;
         }, {})}};
-        await exportRegistrations(seminars, this.event)
+        await exportRegistrationsBySeminars(seminars, this.event)
       }
     },
 

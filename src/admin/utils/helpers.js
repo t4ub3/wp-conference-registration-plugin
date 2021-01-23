@@ -48,10 +48,10 @@ export function getParameterByName(name, url = window.location.href) {
   return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-export async function exportRegistrations(seminars, event) {
+export async function exportRegistrationsBySeminars(seminars, event) {
   let registrations = await getRegistrations(event.id);
   let additionalParams = parseJSONStringArray(event.additional_params);
-  let csvHead = "Vorname;Nachname;E-Mail;Anmeldedatum";
+  let csvHead = "Vorname;Nachname;E-Mail;Bestätigt;Anmeldedatum";
   additionalParams.forEach(param => {
     csvHead += ";" + param.name;
   });
@@ -64,7 +64,8 @@ export async function exportRegistrations(seminars, event) {
         ].registrations.push([
           registration.first_name,
           registration.surname,
-          registration.contact_mail,
+          registration.contact_mail, 
+          registration.confirmed === "1" ? "Ja" : "Nein", 
           registration.registration_date,
           ...additionalParams.map(param => registration.additionalParams[param.code])
         ]);
@@ -80,10 +81,41 @@ export async function exportRegistrations(seminars, event) {
       csvContent += session.registrations.map(registration => registration.join(";")).join("\n");
       csvContent += "\n\n\n"
     });
-    const data = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", data);
-      link.setAttribute("download", seminar.name.replaceAll(" ", "_") + ".csv");
-      link.click();
+    createCsv(csvContent, seminar.name);
   });
+}
+
+export function exportAllRegistrations(registrations, event) {
+  let csvContent = "data:text/csv;charset=utf-8,";
+  csvContent += "Vorname;Nachname;E-Mail;Bestätigt;Anmeldedatum";
+  event.sessions.forEach(session => {
+    csvContent += ";" + session.name;
+  });
+  let additionalParams = parseJSONStringArray(event.additional_params);
+  additionalParams.forEach(param => {
+    csvContent += ";" + param.name;
+  });
+  csvContent += "\n";
+
+  registrations.forEach(registration => {
+    registration.additionalParams = parseJSONStringObject(registration.additional_params);
+    const values = [registration.first_name,
+                    registration.surname, 
+                    registration.contact_mail, 
+                    registration.confirmed === "1" ? "Ja" : "Nein", 
+                    registration.registration_date,
+                    ... event.sessions.map(session => registration["session_" + session.id] || "-"),
+                    ...additionalParams.map(param => registration.additionalParams[param.code])
+                  ];
+    csvContent += values.join(";") + "\n";
+  });
+  createCsv(csvContent, event.name);
+}
+
+function createCsv(content, filename) {
+  const data = encodeURI(content);
+  const link = document.createElement("a");
+  link.setAttribute("href", data);
+  link.setAttribute("download", filename.replaceAll(" ", "_") + ".csv");
+  link.click();
 }
