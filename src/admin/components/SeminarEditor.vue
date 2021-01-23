@@ -80,8 +80,8 @@ export default {
   name: "SeminarEditor",
   components: { ListTable },
   props: {
-    event_id: {
-      type: Number,
+    event: {
+      type: Object,
       required: true,
     },
     tags: {
@@ -99,9 +99,10 @@ export default {
   },
   data() {
     return {
+      event_id: this.event.id,
       newSeminar: {
         name: "",
-        event_id: this.event_id,
+        event_id: this.event.id,
       },
       seminars: [],
       tag_map: {},
@@ -216,7 +217,7 @@ export default {
           sessionsObj[session.id] = {"name": session.name, "registrations": []};
           return sessionsObj;
         }, {})}};
-        await exportRegistrations(seminars, this.event_id)
+        await exportRegistrations(seminars, this.event)
       }
     },
 

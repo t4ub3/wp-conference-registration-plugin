@@ -48,10 +48,15 @@ export function getParameterByName(name, url = window.location.href) {
   return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-export async function exportRegistrations(seminars, event_id) {
-  let registrations = await getRegistrations(event_id);
-  let csv_head = "Vorname;Nachname;E-Mail;Anmeldedatum";
+export async function exportRegistrations(seminars, event) {
+  let registrations = await getRegistrations(event.id);
+  let additionalParams = parseJSONStringArray(event.additional_params);
+  let csvHead = "Vorname;Nachname;E-Mail;Anmeldedatum";
+  additionalParams.forEach(param => {
+    csvHead += ";" + param.name;
+  });
   registrations.forEach(registration => {
+    registration.additionalParams = parseJSONStringObject(registration.additional_params);
     registration.seminars.forEach(seminar => {
       if (seminars[seminar.seminar_id]) {
         seminars[seminar.seminar_id].sessions[
@@ -60,7 +65,8 @@ export async function exportRegistrations(seminars, event_id) {
           registration.first_name,
           registration.surname,
           registration.contact_mail,
-          registration.registration_date
+          registration.registration_date,
+          ...additionalParams.map(param => registration.additionalParams[param.code])
         ]);
       }
     });
@@ -70,7 +76,7 @@ export async function exportRegistrations(seminars, event_id) {
     let csvContent = "data:text/csv;charset=utf-8,";
     Object.values(seminar.sessions).forEach(session => {
       csvContent += session.name + "\n\n";
-      csvContent += csv_head + "\n";
+      csvContent += csvHead + "\n";
       csvContent += session.registrations.map(registration => registration.join(";")).join("\n");
       csvContent += "\n\n\n"
     });
