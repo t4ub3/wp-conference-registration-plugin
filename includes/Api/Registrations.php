@@ -160,7 +160,7 @@ class Registrations extends WP_REST_Controller
                 'first_name' => $parameters["first_name"],
                 'surname' => $parameters["surname"],
                 'contact_mail'  => $parameters["contact_mail"] ?: NULL,
-                'confirmed'  => $parameters["confirmed"] ?: 0,
+                'confirmed'  => isset($parameters["confirmed"]) && $parameters["confirmed"] == "0" ? 0 : 1,
                 'additional_params' => $parameters["additional_params"],
                 'event_id' => $parameters["event_id"]
             ));
@@ -208,7 +208,7 @@ class Registrations extends WP_REST_Controller
                 'first_name' => $parameters["first_name"],
                 'surname' => $parameters["surname"],
                 'contact_mail'  => $parameters["contact_mail"] ?: NULL,
-                'confirmed'  => $parameters["confirmed"] ?: 1,
+                'confirmed'  => isset($parameters["confirmed"]) && $parameters["confirmed"] == "0" ? 0 : 1,
                 'additional_params' => $parameters["additional_params"],
             ), array('id' => $registration_id));
 

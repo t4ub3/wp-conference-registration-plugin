@@ -26,7 +26,6 @@ class Admin {
         if ( current_user_can( $capability ) ) {
             $submenu[ $slug ][] = array( __( 'Events', 'textdomain' ), $capability, 'admin.php?page=' . $slug . '#/' );
             $submenu[ $slug ][] = array( __( 'Referenten', 'textdomain' ), $capability, 'admin.php?page=' . $slug . '#/speakers' );
-            $submenu[ $slug ][] = array( __( 'Übersicht / Export', 'textdomain' ), $capability, 'admin.php?page=' . $slug . '#/export' );
         }
 
         add_action( 'load-' . $hook, [ $this, 'init_hooks'] );

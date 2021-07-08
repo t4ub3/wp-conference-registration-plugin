@@ -13,6 +13,9 @@
         >&nbsp; (Sie müssen zuerst Sessions und Seminare anlegen, um Anmeldungen
         erstellen zu können)</em
       >
+      <button type="button" class="page-title-action" @click="exportRegistrations">
+        Anmeldungen exportieren
+      </button>
     </div>
     <list-table
       :rows="registrations"
@@ -39,7 +42,7 @@ import {
   getRegistrations,
   getSpeakers,
 } from "../utils/api-services";
-import { parseJSONStringArray, parseJSONStringObject } from "../utils/helpers";
+import { exportAllRegistrations, parseJSONStringArray, parseJSONStringObject } from "../utils/helpers";
 import ListTable from "vue-wp-list-table";
 import "vue-wp-list-table/dist/vue-wp-list-table.css";
 
@@ -47,8 +50,8 @@ export default {
   name: "RegistrationEditor",
   components: { ListTable },
   props: {
-    event_id: {
-      type: Number,
+    event: {
+      type: Object,
       required: true,
     },
     sessions: {
@@ -66,9 +69,10 @@ export default {
   },
   data() {
     return {
+      event_id: this.event.id,
       newRegistration: {
         name: "",
-        event_id: this.event_id,
+        event_id: this.event.id,
       },
       seminar_map: {},
       additionalParams_parsed: parseJSONStringArray(this.additionalParams),
@@ -188,6 +192,11 @@ export default {
         }
       }
     },
+
+    exportRegistrations(event) {
+      event.preventDefault();
+      exportAllRegistrations(this.registrations, this.event);
+    }
   },
 };
 </script>

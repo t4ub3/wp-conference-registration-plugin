@@ -11,6 +11,7 @@
             <span :key="`${seminar.id}_${session_id}`">
               <template
                 v-if="
+                  seminar.slot_max !== 0 &&
                   seminar.slot_max <=
                   seminar.registrations[parseInt(session_id)]
                 "
@@ -127,6 +128,12 @@ export default {
 }
 .crep-seminar__description {
   color: #022232;
+}
+@media only screen and (max-width: 600px)  {
+  .crep-seminar__description,
+  .crep-seminar__speakers {
+    margin-left: -50px;
+  }
 }
 .crep-seminar__speakers,
 .crep-seminar__sessions {

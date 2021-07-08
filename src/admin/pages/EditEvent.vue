@@ -42,7 +42,7 @@
         :tags="event.tags"
         :sessions="event.sessions"
         :speakers="event.speakers"
-        :event_id="id"
+        :event="event"
       >
       </seminar-editor>
       <registration-editor
@@ -50,7 +50,7 @@
         :sessions="event.sessions"
         :seminars="event.seminars"
         :additional-params="event.additional_params"
-        :event_id="id"
+        :event="event"
         @update-event-data="refresh"
       >
       </registration-editor>
